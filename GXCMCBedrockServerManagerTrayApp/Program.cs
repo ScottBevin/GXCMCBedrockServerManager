@@ -36,7 +36,10 @@ namespace GXCMCBedrockServerManager
                 {
                     string name = server.ServerProperties != null ? server.ServerProperties.ServerName : "Unknown Server";
 
-                    contextMenuItems.Add(new MenuItem($"{name} ({server.State})"));
+                    MenuItem newItem = new MenuItem($"{name} ({server.State})", ShowServerInstanceOverview);
+                    newItem.Tag = server;
+
+                    contextMenuItems.Add(newItem);
                 }
 
                 contextMenuItems.Add(new MenuItem("-"));
@@ -82,6 +85,12 @@ namespace GXCMCBedrockServerManager
             }
 
             Application.Exit();
+        }
+        void ShowServerInstanceOverview(object sender, EventArgs e)
+        {
+            ServerInstanceOverviewForm newform = new ServerInstanceOverviewForm();
+            newform.ServerInstance = (sender as MenuItem).Tag as ServerInstance;
+            newform.Show();
         }
     }
 

@@ -4,7 +4,7 @@ namespace GXCMCBedrockServerManagerCore
 {
     public class ServerSettingsFile : Utils.JsonFile<ServerSettingsFile>
     {
-        bool TestSetting { get; set; } = false;
+        public bool ShowOutputConsoleWindow { get; set; } = false;
 
         public static ServerSettingsFile Load(string path, string fileName)
         {

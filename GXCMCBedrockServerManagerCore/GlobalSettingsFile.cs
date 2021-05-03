@@ -8,6 +8,8 @@ namespace GXCMCBedrockServerManagerCore
         static string SystemSettingsFileName { get { return "Settings"; } }
 
         public string ServerSettingsFileName { get; set; } = "GXCMCServerSettings";
+        public string ServerExecutableFileName { get; set; } = "bedrock_server.exe";
+
 
         public List<string> ServerLocations { get; set; } = new List<string>();
 

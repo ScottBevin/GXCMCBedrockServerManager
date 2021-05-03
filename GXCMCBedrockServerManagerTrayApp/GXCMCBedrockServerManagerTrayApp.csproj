@@ -52,10 +52,19 @@
     <Compile Include="Forms\AddNewServerForm.Designer.cs">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ServerInstanceOverviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ServerInstanceOverviewForm.Designer.cs">
+      <DependentUpon>ServerInstanceOverviewForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\AddNewServerForm.resx">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ServerInstanceOverviewForm.resx">
+      <DependentUpon>ServerInstanceOverviewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

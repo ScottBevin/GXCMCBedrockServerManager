@@ -51,7 +51,7 @@ namespace GXCMCBedrockServerManager.Forms
                 AddOutputString($"Server: {spf.ServerName}");
             }
 
-            if (File.Exists(Path.Combine(path, "bedrock_server.exe")))
+            if (File.Exists(Path.Combine(path, ServerManager.GlobalSettings.ServerExecutableFileName)))
             {
                 AddOutputString("Server.exe found");
             }
