@@ -84,8 +84,11 @@ namespace GXCMCBedrockServerManager
                 trayIcon.Visible = false;
             }
 
-            Application.Exit();
+            ShutdownAppForm newform = new ShutdownAppForm();
+            newform.ServerManager = ServerManager;
+            newform.Show();
         }
+
         void ShowServerInstanceOverview(object sender, EventArgs e)
         {
             ServerInstanceOverviewForm newform = new ServerInstanceOverviewForm();

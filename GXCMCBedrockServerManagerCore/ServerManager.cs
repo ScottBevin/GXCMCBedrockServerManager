@@ -57,5 +57,13 @@ namespace GXCMCBedrockServerManagerCore
 
             server.Initialise(path, this);
         }
+
+        public void ShutdownAllServers()
+        {
+            foreach (ServerInstance inst in Instances)
+            {
+                inst.Stop();
+            }
+        }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using GXCMCBedrockServerManagerCore.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace GXCMCBedrockServerManagerCore
@@ -32,6 +34,9 @@ namespace GXCMCBedrockServerManagerCore
 
         public Logger Log { get; private set; } = new Logger();
 
+        delegate void RegexMatchCallbackDelegate(Match regexMatch);
+        List<Tuple<Regex, RegexMatchCallbackDelegate>> OutputRegexCallbacks = new List<Tuple<Regex, RegexMatchCallbackDelegate>>();
+
         public void Initialise(string path, ServerManager serverMgr)
         {
             ServerPath = path;
@@ -54,6 +59,9 @@ namespace GXCMCBedrockServerManagerCore
 
                 return;
             }
+
+            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Server started", RegexOptions.Multiline), OutputHandler_ServerStarted));
+            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Quit correctly", RegexOptions.Multiline), OutputHandler_ServerQuit));
 
             State = ServerState.Idle;
         }
@@ -80,6 +88,8 @@ namespace GXCMCBedrockServerManagerCore
                 return false;
             }
 
+            State = ServerState.Starting;
+
             RunningServerProcess = new Process();
 
             RunningServerProcess.StartInfo = new ProcessStartInfo
@@ -102,18 +112,27 @@ namespace GXCMCBedrockServerManagerCore
             RunningServerProcess.BeginOutputReadLine();
             RunningServerProcess.BeginErrorReadLine();
 
-            State = ServerState.Running;
             return true;
         }
 
         public bool Stop()
         {
+            // If we are starting up we need to block and wait...
+            while(State == ServerState.Starting)
+            {
+
+            }
+
             if (State != ServerState.Running)
             {
-                Log.LogError($"Server stop requested when not running, Current State = {State}");
+                Log.LogWarning($"Server stop requested when not running, Current State = {State}");
 
                 return false;
             }
+
+            Log.LogSectionHeader("Stopping");
+
+            State = ServerState.Stopping;
 
             if (RunningServerProcess == null)
             {
@@ -125,18 +144,58 @@ namespace GXCMCBedrockServerManagerCore
 
             RunningServerProcess.StandardInput.WriteLine("STOP");
 
-            State = ServerState.Idle;
             return true;
         }
 
         void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            Log.LogInfo(outLine.Data);
+            if (!string.IsNullOrEmpty(outLine.Data))
+            {
+                foreach (var item in OutputRegexCallbacks)
+                {
+                    Match match = item.Item1.Match(outLine.Data);
+
+                    if (match.Success)
+                    {
+                        item.Item2(match);
+                    }
+                }
+
+                Log.LogInfo(outLine.Data);
+            }
         }
 
         void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            Log.LogError(outLine.Data);
+            if (!string.IsNullOrEmpty(outLine.Data))
+            {
+                Log.LogError(outLine.Data);
+            }
+        }
+
+        void OutputHandler_ServerStarted(Match match)
+        {
+            if (State != ServerState.Starting)
+            {
+                Log.LogError($"Server start output found, but server not starting. Current State = {State}");
+            }
+
+            Log.LogSectionHeader("Running");
+
+            State = ServerState.Running;
+        }
+
+        void OutputHandler_ServerQuit(Match match)
+        {
+            if (State != ServerState.Stopping)
+            {
+                Log.LogError($"Server stop output found, but server not stopping. Current State = {State}");
+            }
+
+            State = ServerState.Idle;
+            RunningServerProcess = null;
+
+            Log.LogSectionHeader("Stopped");
         }
     }
 }

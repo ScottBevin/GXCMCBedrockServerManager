@@ -52,6 +52,12 @@
     <Compile Include="Forms\AddNewServerForm.Designer.cs">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ShutdownAppForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ShutdownAppForm.Designer.cs">
+      <DependentUpon>ShutdownAppForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ServerInstanceOverviewForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -62,6 +68,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\AddNewServerForm.resx">
       <DependentUpon>AddNewServerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ShutdownAppForm.resx">
+      <DependentUpon>ShutdownAppForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ServerInstanceOverviewForm.resx">
       <DependentUpon>ServerInstanceOverviewForm.cs</DependentUpon>
