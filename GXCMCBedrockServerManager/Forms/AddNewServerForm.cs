@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.IO;
+using GXCMCBedrockServerManager.Server;
 
 namespace GXCMCBedrockServerManager.Forms
 {
     public partial class AddNewServerForm : Form
     {
+        public ServerManager ServerManager { get; set; } = null;
+
         public AddNewServerForm()
         {
             InitializeComponent();
@@ -35,7 +38,7 @@ namespace GXCMCBedrockServerManager.Forms
 
             AddOutputString($"Server Path: {path}");
 
-            Utils.ServerPropertiesFile spf = Utils.ServerPropertiesFile.Readfile(path);
+            ServerPropertiesFile spf = ServerPropertiesFile.Load(path);
 
             if(spf == null || spf.FileHasErrors)
             {
@@ -75,7 +78,14 @@ namespace GXCMCBedrockServerManager.Forms
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-
+            if(ServerManager.AddNewServer(FolderBrowserDialog.SelectedPath))
+            {
+                Close();
+            }
+            else 
+            {
+                MessageBox.Show("Error adding server.");
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GXCMCBedrockServerManager.Utils;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GXCMCBedrockServerManager.Utils
+namespace GXCMCBedrockServerManager.Server
 {
-    class ServerPropertiesFile
+    public class ServerPropertiesFile
     {
         public string ServerName = "My Server";
         public string GameMode = "creative";
@@ -37,7 +34,7 @@ namespace GXCMCBedrockServerManager.Utils
         public bool ServerAuthorativeBlockBreaking = true;
         public bool FileHasErrors { get; private set; } = false;
 
-        public static ServerPropertiesFile Readfile(string path)
+        public static ServerPropertiesFile Load(string path)
         {
             string serverPropsPath = Path.Combine(path, "server.properties");
 

@@ -1,6 +1,8 @@
 ﻿using GXCMCBedrockServerManager.Forms;
 using GXCMCBedrockServerManager.Properties;
+using GXCMCBedrockServerManager.Server;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace GXCMCBedrockServerManager
@@ -9,33 +11,56 @@ namespace GXCMCBedrockServerManager
     {
         private NotifyIcon trayIcon;
 
+        ServerManager ServerManager = new Server.ServerManager(); 
+
         public TrayAppContext()
         {
-            // Initialize Tray Icon
-            trayIcon = new NotifyIcon()
+            if (ServerManager.Initialise() == false)
             {
-                Icon = Resources.AppIcon,
-                ContextMenu = new ContextMenu(new MenuItem[] {
-                    new MenuItem("Add New Server", AddNewServer),
-                    new MenuItem("Exit", Exit)
-            }),
-                Visible = true
-            };
+                MessageBox.Show("Failed to initialise server manager");
+
+                Application.Exit();
+            }
+            else
+            {
+                List<MenuItem> contextMenuItems = new List<MenuItem>();
+
+                contextMenuItems.Add(new MenuItem("Add New Server", AddNewServer));
+                contextMenuItems.Add(new MenuItem("-"));
+
+                foreach(ServerInstance server in ServerManager.Instances)
+                {
+                    string name = server.ServerProperties != null ? server.ServerProperties.ServerName : "Unknown Server";
+
+                    contextMenuItems.Add(new MenuItem($"{name} ({server.State})"));
+                }
+
+                contextMenuItems.Add(new MenuItem("-"));
+                contextMenuItems.Add(new MenuItem("Exit", Exit));
+
+                // Initialize Tray Icon
+                trayIcon = new NotifyIcon()
+                {
+                    Icon = Resources.AppIcon,
+                    ContextMenu = new ContextMenu(contextMenuItems.ToArray()),
+                    Visible = true
+                };
+            }
         }
 
         void AddNewServer(object sender, EventArgs e)
         {
             AddNewServerForm newform = new AddNewServerForm();
-            DialogResult result = newform.ShowDialog();
-
-            int test = 1;
-            ++test;
+            newform.ServerManager = ServerManager;
+            newform.Show();
         }
 
         void Exit(object sender, EventArgs e)
         {
-            // Hide tray icon, otherwise it will remain shown until user mouses over it
-            trayIcon.Visible = false;
+            if(trayIcon != null)
+            {
+                trayIcon.Visible = false;
+            }
 
             Application.Exit();
         }
