@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31105.61
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GXCMCBedrockServerManager", "GXCMCBedrockServerManager\GXCMCBedrockServerManager.csproj", "{F76A44CD-03EC-4F99-A625-C30DD8F68700}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GXCMCBedrockServerManagerTrayApp", "GXCMCBedrockServerManagerTrayApp\GXCMCBedrockServerManagerTrayApp.csproj", "{F76A44CD-03EC-4F99-A625-C30DD8F68700}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GXCMCBedrockServerManagerCore", "GXCMCBedrockServerManagerCore\GXCMCBedrockServerManagerCore.csproj", "{621B69C5-6AEC-4861-A728-42076ECE4FD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F76A44CD-03EC-4F99-A625-C30DD8F68700}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F76A44CD-03EC-4F99-A625-C30DD8F68700}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F76A44CD-03EC-4F99-A625-C30DD8F68700}.Release|Any CPU.Build.0 = Release|Any CPU
+		{621B69C5-6AEC-4861-A728-42076ECE4FD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{621B69C5-6AEC-4861-A728-42076ECE4FD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{621B69C5-6AEC-4861-A728-42076ECE4FD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{621B69C5-6AEC-4861-A728-42076ECE4FD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

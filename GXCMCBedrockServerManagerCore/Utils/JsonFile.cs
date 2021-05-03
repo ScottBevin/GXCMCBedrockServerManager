@@ -1,9 +1,8 @@
 ﻿using System;
 using Newtonsoft.Json;
 using System.IO;
-using System.Windows.Forms;
 
-namespace GXCMCBedrockServerManager.Utils
+namespace GXCMCBedrockServerManagerCore.Utils
 {
     public class JsonFile<T> where T : class, new()
     {
@@ -23,18 +22,17 @@ namespace GXCMCBedrockServerManager.Utils
                 }
                 catch (Exception e)
                 {
-                    if (MessageBox.Show(
-                        $"Error loading {fullPath}:\n\n{e.Message}\n\nReset file to default?",
+                   if (ErrorHandler.RaiseErrorRequestHandle(
                         $"Error loading {fullPath}",
-                        MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        T jsonObj = new T();
-                        if (SaveJsonFile(jsonObj, path, name, false))
-                        {
-                            return jsonObj;
-                        }
-                    }
-                    else
+                        $"Error loading {fullPath}:\n\n{e.Message}\n\nReset file to default?"))
+                   {
+                       T jsonObj = new T();
+                       if (SaveJsonFile(jsonObj, path, name, false))
+                       {
+                           return jsonObj;
+                       }
+                   }
+                   else
                     {
                         return null;
                     }
@@ -85,7 +83,7 @@ namespace GXCMCBedrockServerManager.Utils
                     File.Move(fullOldPath, fullPath);
                 }
 
-                MessageBox.Show(
+                ErrorHandler.RaiseErrorMessage(
                     $"Error saving {fullPath}",
                     e.Message);
 

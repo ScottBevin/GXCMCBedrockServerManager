@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GXCMCBedrockServerManager.Server
+namespace GXCMCBedrockServerManagerCore
 {
     public class ServerManager
     {

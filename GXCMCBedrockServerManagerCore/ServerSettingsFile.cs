@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GXCMCBedrockServerManager.Server
+namespace GXCMCBedrockServerManagerCore
 {
     public class ServerSettingsFile : Utils.JsonFile<ServerSettingsFile>
     {

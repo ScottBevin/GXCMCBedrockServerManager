@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GXCMCBedrockServerManager.Server
+namespace GXCMCBedrockServerManagerCore
 {
     public class GlobalSettingsFile : Utils.JsonFile<GlobalSettingsFile>
     {

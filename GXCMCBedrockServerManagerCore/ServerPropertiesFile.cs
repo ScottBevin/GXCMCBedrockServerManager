@@ -1,8 +1,8 @@
-﻿using GXCMCBedrockServerManager.Utils;
+﻿using GXCMCBedrockServerManagerCore.Utils;
 using System;
 using System.IO;
 
-namespace GXCMCBedrockServerManager.Server
+namespace GXCMCBedrockServerManagerCore
 {
     public class ServerPropertiesFile
     {

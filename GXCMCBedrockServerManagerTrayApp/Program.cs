@@ -1,6 +1,7 @@
 ﻿using GXCMCBedrockServerManager.Forms;
 using GXCMCBedrockServerManager.Properties;
-using GXCMCBedrockServerManager.Server;
+using GXCMCBedrockServerManagerCore;
+using GXCMCBedrockServerManagerCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -11,10 +12,13 @@ namespace GXCMCBedrockServerManager
     {
         private NotifyIcon trayIcon;
 
-        ServerManager ServerManager = new Server.ServerManager(); 
+        ServerManager ServerManager = new ServerManager(); 
 
         public TrayAppContext()
         {
+            ErrorHandler.OnErrorMessage = OnErrorMessage;
+            ErrorHandler.OnErrorRequestHandle = OnErrorRequestHandle;
+
             if (ServerManager.Initialise() == false)
             {
                 MessageBox.Show("Failed to initialise server manager");
@@ -46,6 +50,21 @@ namespace GXCMCBedrockServerManager
                     Visible = true
                 };
             }
+        }
+
+        void OnErrorMessage(string title, string message)
+        {
+            MessageBox.Show(message, title);
+        }
+
+        bool OnErrorRequestHandle(string title, string message)
+        {
+            if (MessageBox.Show(message, title, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         void AddNewServer(object sender, EventArgs e)
