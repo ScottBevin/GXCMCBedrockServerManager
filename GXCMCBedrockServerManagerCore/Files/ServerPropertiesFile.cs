@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace GXCMCBedrockServerManagerCore
+namespace GXCMCBedrockServerManagerCore.Files
 {
     public class ServerPropertiesFile
     {
@@ -22,7 +22,7 @@ namespace GXCMCBedrockServerManagerCore
         public uint MaxThreads = 8;
         public string LevelName = "My Level";
         public string LevelSeed = "";
-        public string DefaultPlayerPermissionLevel = "member";
+        public ServerPermissions DefaultPlayerPermissionLevel = ServerPermissions.Member;
         public bool TexturePackRequired = false;
         public bool ContentLogFileEnabled = false;
         public UInt16 CompressionThreshold = 1;
@@ -62,7 +62,11 @@ namespace GXCMCBedrockServerManagerCore
                 allFound &= propsFile.TryGetValue("max-threads", ref spf.MaxThreads);
                 allFound &= propsFile.TryGetValue("level-name", ref spf.LevelName);
                 allFound &= propsFile.TryGetValue("level-seed", ref spf.LevelSeed);
-                allFound &= propsFile.TryGetValue("default-player-permission-level", ref spf.DefaultPlayerPermissionLevel);
+
+                string permissions = "";
+                allFound &= propsFile.TryGetValue("default-player-permission-level", ref permissions);
+                spf.DefaultPlayerPermissionLevel = ServerEnumHelpers.ServerPermissionFromString(permissions);
+
                 allFound &= propsFile.TryGetValue("texturepack-required", ref spf.TexturePackRequired);
                 allFound &= propsFile.TryGetValue("content-log-file-enabled", ref spf.ContentLogFileEnabled);
                 allFound &= propsFile.TryGetValue("compression-threshold", ref spf.CompressionThreshold);

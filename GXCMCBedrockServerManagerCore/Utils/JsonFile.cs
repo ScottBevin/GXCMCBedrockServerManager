@@ -72,6 +72,7 @@ namespace GXCMCBedrockServerManagerCore.Utils
             {
                 string json = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
                 File.WriteAllText(fullPathTemp, json);
+                File.Delete(fullPath);
                 File.Move(fullPathTemp, fullPath);
 
                 return true;
@@ -80,6 +81,7 @@ namespace GXCMCBedrockServerManagerCore.Utils
             {
                 if(renameOldSuccessful)
                 {
+                    File.Delete(fullOldPath);
                     File.Move(fullOldPath, fullPath);
                 }
 

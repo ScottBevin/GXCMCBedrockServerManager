@@ -28,6 +28,10 @@ namespace GXCMCBedrockServerManager.Forms
                 }
 
                 ServerInstance.Log.OnNewLogEntry += OnNewLogEntry;
+
+                this.Text = ServerInstance.ServerProperties.ServerName;
+
+                UpdatePlayersList();
             }
         }
 
@@ -90,6 +94,216 @@ namespace GXCMCBedrockServerManager.Forms
             {
                 ServerInstance.SendServerMessage(SendMessageTextBox.Text);
                 SendMessageTextBox.Text = "";
+            }
+        }
+
+        private void SendCommandButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(SendCommandTextBox.Text))
+            {
+                ServerInstance.RunCommand(SendCommandTextBox.Text);
+                SendCommandTextBox.Text = "";
+            }
+        }
+
+        private void UpdatePlayersList()
+        {
+            string selectedName = PlayersListBox.SelectedItem as string;
+
+            PlayersListBox.Items.Clear();
+
+            foreach(var player in ServerInstance.Players.Players)
+            {
+                if(string.IsNullOrEmpty(PlayerFilterTextBox.Text) || player.Name.Contains(PlayerFilterTextBox.Text))
+                {
+                    PlayersListBox.Items.Add(player.Name);
+                }
+            }
+
+            if(!string.IsNullOrEmpty(selectedName))
+            {
+                int index = PlayersListBox.Items.IndexOf(selectedName);
+
+                if(index >= 0)
+                {
+                    PlayersListBox.SelectedIndex = index;
+                }
+                else
+                {
+                    PlayersListBox.SelectedIndex = -1;
+                }
+            }
+        }
+
+        private void AddNewPlayerButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(AddNewPlayerTextBox.Text))
+            {
+                ServerInstance.Players.FindOrRegisterNewPlayer(AddNewPlayerTextBox.Text);
+                AddNewPlayerTextBox.Text = "";
+
+                UpdatePlayersList();
+            }
+        }
+
+        private void PlayerFilterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdatePlayersList();
+        }
+
+        private void SavePlayersButton_Click(object sender, EventArgs e)
+        {
+            ServerInstance.Players.SaveAndNotifyServer();
+        }
+
+        private void RevertPlayersChangesButton_Click(object sender, EventArgs e)
+        {
+            ServerInstance.Players.Reload();
+
+            UpdatePlayersList();
+        }
+
+        void UpdateSelectedPlayerInfo()
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                PlayerNameTextBox.Text = selected.Name;
+                PlayerXUIDTextBox.Text = selected.XUID;
+                FirstJoinedTextBos.Text = selected.FirstJoined.ToString();
+                LastJoinedTextBox.Text = selected.LastJoined.ToString();
+                IsWhiteListedTextBox.Text = selected.IsWhitelisted ? "Yes" : "No";
+                IsBannedTextBox.Text = selected.IsBanned ? "Yes" : "No";
+                IsOnlineTextBox.Text = selected.IsOnline ? "Yes" : "No";
+                PlayerPermissionsTextBox.Text = ServerEnumHelpers.ServerPermissionToString(selected.Permissions);
+            }
+        }
+
+        private void PlayersListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateSelectedPlayerInfo();
+        }
+
+        private void AddPlayerToWhitelistButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                selected.IsWhitelisted = true;
+
+                ServerInstance.Players.SaveAndNotifyServer();
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void RemovePlayerFromWhitelistButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                selected.IsWhitelisted = false;
+
+                ServerInstance.Players.SaveAndNotifyServer();
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void BanPlayerButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                ServerInstance.Players.BanPlayer(selected);
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void UnbanPlayerButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                selected.IsBanned = false;
+
+                ServerInstance.Players.SaveAndNotifyServer();
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void PromotePlayerButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                ServerPermissions current = selected.Permissions;
+
+                if(current == ServerPermissions.Default)
+                {
+                    current = ServerInstance.ServerProperties.DefaultPlayerPermissionLevel;
+                }
+
+                if(current == ServerPermissions.Visitor)
+                {
+                    selected.Permissions = ServerPermissions.Member;
+                }
+                else if (current == ServerPermissions.Member)
+                {
+                    selected.Permissions = ServerPermissions.Operator;
+                }
+
+                ServerInstance.Players.SaveAndNotifyServer();
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void DemotePlayerButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                ServerPermissions current = selected.Permissions;
+
+                if (current == ServerPermissions.Default)
+                {
+                    current = ServerInstance.ServerProperties.DefaultPlayerPermissionLevel;
+                }
+
+                if (current == ServerPermissions.Operator)
+                {
+                    selected.Permissions = ServerPermissions.Member;
+                }
+                else if (current == ServerPermissions.Member)
+                {
+                    selected.Permissions = ServerPermissions.Visitor;
+                }
+
+                ServerInstance.Players.SaveAndNotifyServer();
+
+                UpdateSelectedPlayerInfo();
+            }
+        }
+
+        private void KickPlayerButton_Click(object sender, EventArgs e)
+        {
+            ServerPlayers.Player selected = ServerInstance.Players.FindPlayerByName(PlayersListBox.SelectedItem as string);
+
+            if (selected != null)
+            {
+                ServerInstance.Players.KickPlayer(selected, KickMessageTextBox.Text);
+
+                UpdateSelectedPlayerInfo();
             }
         }
     }

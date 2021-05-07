@@ -1,10 +1,10 @@
 ﻿using GXCMCBedrockServerManagerCore.Utils;
+using GXCMCBedrockServerManagerCore.Files;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace GXCMCBedrockServerManagerCore
 {
@@ -20,7 +20,7 @@ namespace GXCMCBedrockServerManagerCore
             Stopping,
         }
 
-        string ServerPath { get; set; } = "";
+        public string ServerPath { get; private set; } = "";
 
         ServerManager ServerManager { get; set; } = null;
 
@@ -37,6 +37,8 @@ namespace GXCMCBedrockServerManagerCore
         delegate void RegexMatchCallbackDelegate(Match regexMatch);
         List<Tuple<Regex, RegexMatchCallbackDelegate>> OutputRegexCallbacks = new List<Tuple<Regex, RegexMatchCallbackDelegate>>();
 
+        public ServerPlayers Players { get; private set; } = new ServerPlayers();
+
         public void Initialise(string path, ServerManager serverMgr)
         {
             ServerPath = path;
@@ -48,7 +50,6 @@ namespace GXCMCBedrockServerManagerCore
             if (ServerSettings == null || ServerProperties == null)
             {
                 State = ServerState.InitialisationError;
-
                 return;
             }
 
@@ -56,12 +57,19 @@ namespace GXCMCBedrockServerManagerCore
             if(!File.Exists(executableName))
             {
                 State = ServerState.InitialisationError;
+                return;
+            }
 
+            if(!Players.Initialise(this))
+            {
+                State = ServerState.InitialisationError;
                 return;
             }
 
             OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Server started", RegexOptions.Multiline), OutputHandler_ServerStarted));
             OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Quit correctly", RegexOptions.Multiline), OutputHandler_ServerQuit));
+            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Player connected.*$", RegexOptions.Multiline), OutputHandler_PlayerConnected));
+            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Player disconnected.*$", RegexOptions.Multiline), OutputHandler_PlayerDisconnected));
 
             State = ServerState.Idle;
         }
@@ -151,10 +159,19 @@ namespace GXCMCBedrockServerManagerCore
 
         public void SendServerMessage(string message)
         {
-            if(RunningServerProcess != null)
+            if(RunningServerProcess != null && State == ServerState.Running && !string.IsNullOrEmpty(message))
             {
                 Log.LogInfo($"Sending server message: {message}");
                 RunningServerProcess.StandardInput.WriteLine($"say {message}");
+            }
+        }
+
+        public void RunCommand(string command)
+        {
+            if (RunningServerProcess != null && State == ServerState.Running && !string.IsNullOrEmpty(command))
+            {
+                Log.LogInfo($"Running Command: {command}");
+                RunningServerProcess.StandardInput.WriteLine(command);
             }
         }
 
@@ -211,6 +228,44 @@ namespace GXCMCBedrockServerManagerCore
             RunningServerProcess = null;
 
             Log.LogSectionHeader("Stopped");
+        }
+
+        void OutputHandler_PlayerConnected(Match match)
+        {
+            string s = match.ToString();
+
+            int colonIdx = s.IndexOf(':') + 1;
+            int commaIdx = s.IndexOf(',');
+
+            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
+
+            Log.LogInfo($"Player Joined: {s}");
+
+            ServerPlayers.Player player = Players.FindPlayerByName(s);
+
+            if(player != null)
+            {
+                Players.NotifyPlayerJoinedServer(player);
+            }
+        }
+
+        void OutputHandler_PlayerDisconnected(Match match)
+        {
+            string s = match.ToString();
+
+            int colonIdx = s.IndexOf(':') + 1;
+            int commaIdx = s.IndexOf(',');
+
+            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
+
+            Log.LogInfo($"Player Left: {s}");
+
+            ServerPlayers.Player player = Players.FindPlayerByName(s);
+
+            if (player != null)
+            {
+                Players.NotifyPlayerLeftServer(player);
+            }
         }
 
         #endregion

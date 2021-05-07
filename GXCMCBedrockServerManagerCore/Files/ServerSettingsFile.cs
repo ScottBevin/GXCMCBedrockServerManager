@@ -1,10 +1,11 @@
 ﻿using System;
 
-namespace GXCMCBedrockServerManagerCore
+namespace GXCMCBedrockServerManagerCore.Files
 {
     public class ServerSettingsFile : Utils.JsonFile<ServerSettingsFile>
     {
         public bool ShowOutputConsoleWindow { get; set; } = false;
+        public ServerPlayers.ServerPlayersSettings Players { get; set; } = new ServerPlayers.ServerPlayersSettings();
 
         public static ServerSettingsFile Load(string path, string fileName)
         {
