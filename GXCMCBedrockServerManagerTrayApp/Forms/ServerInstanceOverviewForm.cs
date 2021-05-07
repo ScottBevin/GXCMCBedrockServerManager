@@ -83,5 +83,14 @@ namespace GXCMCBedrockServerManager.Forms
                 }
             }
         }
+
+        private void SendMessageButton_Click(object sender, EventArgs e)
+        {
+            if(!string.IsNullOrEmpty(SendMessageTextBox.Text))
+            {
+                ServerInstance.SendServerMessage(SendMessageTextBox.Text);
+                SendMessageTextBox.Text = "";
+            }
+        }
     }
 }

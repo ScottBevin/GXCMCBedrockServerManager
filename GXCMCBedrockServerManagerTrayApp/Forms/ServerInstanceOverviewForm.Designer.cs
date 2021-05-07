@@ -32,6 +32,8 @@ namespace GXCMCBedrockServerManager.Forms
             this.OutputTextBox = new System.Windows.Forms.TextBox();
             this.StartServerButton = new System.Windows.Forms.Button();
             this.StopServerButton = new System.Windows.Forms.Button();
+            this.SendMessageTextBox = new System.Windows.Forms.TextBox();
+            this.SendMessageButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // OutputTextBox
@@ -62,15 +64,34 @@ namespace GXCMCBedrockServerManager.Forms
             this.StopServerButton.UseVisualStyleBackColor = true;
             this.StopServerButton.Click += new System.EventHandler(this.StopServerButton_Click);
             // 
-            // ServerInstanceOverview
+            // SendMessageTextBox
+            // 
+            this.SendMessageTextBox.Location = new System.Drawing.Point(13, 444);
+            this.SendMessageTextBox.Name = "SendMessageTextBox";
+            this.SendMessageTextBox.Size = new System.Drawing.Size(694, 20);
+            this.SendMessageTextBox.TabIndex = 3;
+            // 
+            // SendMessageButton
+            // 
+            this.SendMessageButton.Location = new System.Drawing.Point(713, 444);
+            this.SendMessageButton.Name = "SendMessageButton";
+            this.SendMessageButton.Size = new System.Drawing.Size(75, 23);
+            this.SendMessageButton.TabIndex = 4;
+            this.SendMessageButton.Text = "Send";
+            this.SendMessageButton.UseVisualStyleBackColor = true;
+            this.SendMessageButton.Click += new System.EventHandler(this.SendMessageButton_Click);
+            // 
+            // ServerInstanceOverviewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 611);
+            this.Controls.Add(this.SendMessageButton);
+            this.Controls.Add(this.SendMessageTextBox);
             this.Controls.Add(this.StopServerButton);
             this.Controls.Add(this.StartServerButton);
             this.Controls.Add(this.OutputTextBox);
-            this.Name = "ServerInstanceOverview";
+            this.Name = "ServerInstanceOverviewForm";
             this.Text = "ServerInstanceOverview";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServerInstanceOverview_FormClosing);
             this.Shown += new System.EventHandler(this.ServerInstanceOverview_Shown);
@@ -84,5 +105,7 @@ namespace GXCMCBedrockServerManager.Forms
         private System.Windows.Forms.TextBox OutputTextBox;
         private System.Windows.Forms.Button StartServerButton;
         private System.Windows.Forms.Button StopServerButton;
+        private System.Windows.Forms.TextBox SendMessageTextBox;
+        private System.Windows.Forms.Button SendMessageButton;
     }
 }

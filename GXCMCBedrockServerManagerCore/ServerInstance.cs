@@ -66,6 +66,8 @@ namespace GXCMCBedrockServerManagerCore
             State = ServerState.Idle;
         }
 
+        #region Public Interface
+
         public bool Start()
         {
             Log.BeginStreamingToFile(ServerPath);
@@ -147,6 +149,19 @@ namespace GXCMCBedrockServerManagerCore
             return true;
         }
 
+        public void SendServerMessage(string message)
+        {
+            if(RunningServerProcess != null)
+            {
+                Log.LogInfo($"Sending server message: {message}");
+                RunningServerProcess.StandardInput.WriteLine($"say {message}");
+            }
+        }
+
+        #endregion
+
+        #region Output Handling
+
         void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             if (!string.IsNullOrEmpty(outLine.Data))
@@ -197,5 +212,7 @@ namespace GXCMCBedrockServerManagerCore
 
             Log.LogSectionHeader("Stopped");
         }
+
+        #endregion
     }
 }
