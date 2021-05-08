@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using GXCMCBedrockServerManagerCore.Files;
 
 namespace GXCMCBedrockServerManagerCore
@@ -8,6 +11,10 @@ namespace GXCMCBedrockServerManagerCore
         public GlobalSettingsFile GlobalSettings { get; private set; } = null;
 
         public List<ServerInstance> Instances { get; private set; } = new List<ServerInstance>();
+        object InstanceLock = new object();
+
+        bool bShuttingDown = false;
+        Thread UpdateThread = null;
 
         public bool Initialise()
         {
@@ -23,7 +30,49 @@ namespace GXCMCBedrockServerManagerCore
                 RegisterExistingServer(path);
             }
 
+            // Setup and launch the update thread
+            ThreadStart updateThreadStart = UpdateThreadLoop;
+            UpdateThread = new Thread(updateThreadStart);
+            UpdateThread.Start();
+
             return true;
+        }
+
+        void UpdateThreadLoop()
+        {
+            Stopwatch timer = new Stopwatch();
+
+            timer.Start();
+
+            while (!bShuttingDown)
+            {
+                TimeSpan currentTime = timer.Elapsed;
+
+                lock(InstanceLock)
+                {
+                    foreach(ServerInstance inst in Instances)
+                    {
+                        inst.Update();
+                    }
+                }
+
+                double sleepTime = GlobalSettings.ServerUpdateTickRate - (double)(((timer.Elapsed - currentTime).Milliseconds) * 0.001);
+
+                if(sleepTime > 0)
+                {
+                    Thread.Sleep((int)(sleepTime * 1000));
+                }
+            }
+
+            timer.Stop();
+        }
+
+        public void Shutdown()
+        {
+            bShuttingDown = true;
+
+            UpdateThread.Join();
+            UpdateThread = null;
         }
 
         /*

@@ -10,6 +10,7 @@ namespace GXCMCBedrockServerManagerCore
         public string ServerSettingsFileName { get; set; } = "GXCMCServerSettings";
         public string ServerExecutableFileName { get; set; } = "bedrock_server.exe";
 
+        public float ServerUpdateTickRate { get; set; } = 1.0f / 30.0f;
 
         public List<string> ServerLocations { get; set; } = new List<string>();
 

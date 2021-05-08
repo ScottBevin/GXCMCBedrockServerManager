@@ -48,6 +48,8 @@ namespace GXCMCBedrockServerManager.Forms
 
         void ShutdownApp()
         {
+            ServerManager.Shutdown();
+
             Application.Exit();
         }
     }

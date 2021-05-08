@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using GXCMCBedrockServerManagerCore.Tasks;
 
 namespace GXCMCBedrockServerManagerCore
 {
@@ -34,10 +35,19 @@ namespace GXCMCBedrockServerManagerCore
 
         public Logger Log { get; private set; } = new Logger();
 
-        delegate void RegexMatchCallbackDelegate(Match regexMatch);
-        List<Tuple<Regex, RegexMatchCallbackDelegate>> OutputRegexCallbacks = new List<Tuple<Regex, RegexMatchCallbackDelegate>>();
+        public class OutputHandler
+        {
+            public delegate void RegexMatchCallbackDelegate(Match regexMatch);
+
+            public Regex RegexPattern { get; set; }
+            public RegexMatchCallbackDelegate Callback { get; set; }
+        }
+
+        List<OutputHandler> OutputRegexCallbacks = new List<OutputHandler>();
 
         public ServerPlayers Players { get; private set; } = new ServerPlayers();
+
+        ServerTaskController TaskController { get; set; } = new ServerTaskController();
 
         public void Initialise(string path, ServerManager serverMgr)
         {
@@ -54,24 +64,50 @@ namespace GXCMCBedrockServerManagerCore
             }
 
             string executableName = Path.Combine(ServerPath, serverMgr.GlobalSettings.ServerExecutableFileName);
-            if(!File.Exists(executableName))
+            if (!File.Exists(executableName))
             {
                 State = ServerState.InitialisationError;
                 return;
             }
 
-            if(!Players.Initialise(this))
+            if (!Players.Initialise(this))
             {
                 State = ServerState.InitialisationError;
                 return;
             }
 
-            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Server started", RegexOptions.Multiline), OutputHandler_ServerStarted));
-            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Quit correctly", RegexOptions.Multiline), OutputHandler_ServerQuit));
-            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Player connected.*$", RegexOptions.Multiline), OutputHandler_PlayerConnected));
-            OutputRegexCallbacks.Add(new Tuple<Regex, RegexMatchCallbackDelegate>(new Regex("Player disconnected.*$", RegexOptions.Multiline), OutputHandler_PlayerDisconnected));
+            if(!TaskController.Initialise(this))
+            {
+                State = ServerState.InitialisationError;
+                return;
+            }
+
+            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Server started", RegexOptions.Multiline), Callback = OutputHandler_ServerStarted });
+            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Player connected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerConnected });
+            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Player disconnected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerDisconnected });
 
             State = ServerState.Idle;
+        }
+
+        public void Update()
+        {
+            TaskController.Update();
+
+            switch(State)
+            {
+                case ServerState.Stopping:
+                    {
+                        //if (State != ServerState.Stopping)
+                        //{
+                        //    Log.LogError($"Server stop output found, but server not stopping. Current State = {State}");
+                        //}
+                        //
+                        //State = ServerState.Idle;
+                        //RunningServerProcess = null;
+                        //
+                        //Log.LogSectionHeader("Stopped");
+                    } break;
+            }
         }
 
         #region Public Interface
@@ -114,7 +150,7 @@ namespace GXCMCBedrockServerManagerCore
                 FileName = executableName
             };
 
-            RunningServerProcess.OutputDataReceived += new DataReceivedEventHandler(OutputHandler);
+            RunningServerProcess.OutputDataReceived += new DataReceivedEventHandler(ProcessOutputHandler);
             RunningServerProcess.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
 
             RunningServerProcess.Start();
@@ -152,7 +188,11 @@ namespace GXCMCBedrockServerManagerCore
                 return true;
             }
 
-            RunningServerProcess.StandardInput.WriteLine("STOP");
+            ShutDownServerTask shutdownTask = new ShutDownServerTask();
+            TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            {
+                Task = shutdownTask
+            });
 
             return true;
         }
@@ -168,28 +208,38 @@ namespace GXCMCBedrockServerManagerCore
 
         public void RunCommand(string command)
         {
-            if (RunningServerProcess != null && State == ServerState.Running && !string.IsNullOrEmpty(command))
+            if (RunningServerProcess != null && !string.IsNullOrEmpty(command))
             {
                 Log.LogInfo($"Running Command: {command}");
                 RunningServerProcess.StandardInput.WriteLine(command);
             }
         }
 
+        public void RegisterOutputHandler(OutputHandler outputHndl)
+        {
+            OutputRegexCallbacks.Add(outputHndl);
+        }
+
+        public void UnregisterOutputHandler(OutputHandler outputHndl)
+        {
+            OutputRegexCallbacks.Remove(outputHndl);
+        }
+
         #endregion
 
         #region Output Handling
 
-        void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        void ProcessOutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             if (!string.IsNullOrEmpty(outLine.Data))
             {
                 foreach (var item in OutputRegexCallbacks)
                 {
-                    Match match = item.Item1.Match(outLine.Data);
+                    Match match = item.RegexPattern.Match(outLine.Data);
 
                     if (match.Success)
                     {
-                        item.Item2(match);
+                        item.Callback(match);
                     }
                 }
 
@@ -215,19 +265,6 @@ namespace GXCMCBedrockServerManagerCore
             Log.LogSectionHeader("Running");
 
             State = ServerState.Running;
-        }
-
-        void OutputHandler_ServerQuit(Match match)
-        {
-            if (State != ServerState.Stopping)
-            {
-                Log.LogError($"Server stop output found, but server not stopping. Current State = {State}");
-            }
-
-            State = ServerState.Idle;
-            RunningServerProcess = null;
-
-            Log.LogSectionHeader("Stopped");
         }
 
         void OutputHandler_PlayerConnected(Match match)
