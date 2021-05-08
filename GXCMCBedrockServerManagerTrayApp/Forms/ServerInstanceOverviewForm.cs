@@ -50,7 +50,7 @@ namespace GXCMCBedrockServerManager.Forms
 
         private void StopServerButton_Click(object sender, EventArgs e)
         {
-            ServerInstance.Stop();
+            ServerInstance.Stop((int)StopTimerNumberInput.Value);
         }
 
         void OnNewLogEntry(Logger.LogEntry entry)
@@ -309,7 +309,7 @@ namespace GXCMCBedrockServerManager.Forms
 
         private void RestartButton_Click(object sender, EventArgs e)
         {
-            ServerInstance.Restart();
+            ServerInstance.Restart((int)RestartTimerNumberInput.Value);
         }
     }
 }

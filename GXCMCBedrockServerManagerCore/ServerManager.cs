@@ -112,7 +112,7 @@ namespace GXCMCBedrockServerManagerCore
         {
             foreach (ServerInstance inst in Instances)
             {
-                inst.Stop();
+                inst.Stop(0);
             }
         }
     }

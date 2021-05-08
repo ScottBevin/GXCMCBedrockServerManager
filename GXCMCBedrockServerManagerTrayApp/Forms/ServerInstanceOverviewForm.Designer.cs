@@ -31,6 +31,7 @@ namespace GXCMCBedrockServerManager.Forms
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.RestartButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.SendCommandButton = new System.Windows.Forms.Button();
             this.SendCommandTextBox = new System.Windows.Forms.TextBox();
@@ -72,11 +73,14 @@ namespace GXCMCBedrockServerManager.Forms
             this.AddNewPlayerTextBox = new System.Windows.Forms.TextBox();
             this.PlayerFilterTextBox = new System.Windows.Forms.TextBox();
             this.PlayersListBox = new System.Windows.Forms.ListBox();
-            this.RestartButton = new System.Windows.Forms.Button();
+            this.StopTimerNumberInput = new System.Windows.Forms.NumericUpDown();
+            this.RestartTimerNumberInput = new System.Windows.Forms.NumericUpDown();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -94,6 +98,8 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.RestartTimerNumberInput);
+            this.tabPage1.Controls.Add(this.StopTimerNumberInput);
             this.tabPage1.Controls.Add(this.RestartButton);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.SendCommandButton);
@@ -111,6 +117,16 @@ namespace GXCMCBedrockServerManager.Forms
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // RestartButton
+            // 
+            this.RestartButton.Location = new System.Drawing.Point(890, 599);
+            this.RestartButton.Name = "RestartButton";
+            this.RestartButton.Size = new System.Drawing.Size(75, 23);
+            this.RestartButton.TabIndex = 18;
+            this.RestartButton.Text = "Restart";
+            this.RestartButton.UseVisualStyleBackColor = true;
+            this.RestartButton.Click += new System.EventHandler(this.RestartButton_Click);
             // 
             // label2
             // 
@@ -166,7 +182,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // StopServerButton
             // 
-            this.StopServerButton.Location = new System.Drawing.Point(809, 599);
+            this.StopServerButton.Location = new System.Drawing.Point(757, 599);
             this.StopServerButton.Name = "StopServerButton";
             this.StopServerButton.Size = new System.Drawing.Size(75, 23);
             this.StopServerButton.TabIndex = 11;
@@ -176,7 +192,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // StartServerButton
             // 
-            this.StartServerButton.Location = new System.Drawing.Point(728, 600);
+            this.StartServerButton.Location = new System.Drawing.Point(624, 599);
             this.StartServerButton.Name = "StartServerButton";
             this.StartServerButton.Size = new System.Drawing.Size(75, 23);
             this.StartServerButton.TabIndex = 10;
@@ -513,15 +529,19 @@ namespace GXCMCBedrockServerManager.Forms
             this.PlayersListBox.TabIndex = 0;
             this.PlayersListBox.SelectedIndexChanged += new System.EventHandler(this.PlayersListBox_SelectedIndexChanged);
             // 
-            // RestartButton
+            // StopTimerNumberInput
             // 
-            this.RestartButton.Location = new System.Drawing.Point(890, 599);
-            this.RestartButton.Name = "RestartButton";
-            this.RestartButton.Size = new System.Drawing.Size(75, 23);
-            this.RestartButton.TabIndex = 18;
-            this.RestartButton.Text = "Restart";
-            this.RestartButton.UseVisualStyleBackColor = true;
-            this.RestartButton.Click += new System.EventHandler(this.RestartButton_Click);
+            this.StopTimerNumberInput.Location = new System.Drawing.Point(705, 602);
+            this.StopTimerNumberInput.Name = "StopTimerNumberInput";
+            this.StopTimerNumberInput.Size = new System.Drawing.Size(46, 20);
+            this.StopTimerNumberInput.TabIndex = 19;
+            // 
+            // RestartTimerNumberInput
+            // 
+            this.RestartTimerNumberInput.Location = new System.Drawing.Point(838, 602);
+            this.RestartTimerNumberInput.Name = "RestartTimerNumberInput";
+            this.RestartTimerNumberInput.Size = new System.Drawing.Size(46, 20);
+            this.RestartTimerNumberInput.TabIndex = 20;
             // 
             // ServerInstanceOverviewForm
             // 
@@ -540,6 +560,8 @@ namespace GXCMCBedrockServerManager.Forms
             this.tabPage2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -590,5 +612,7 @@ namespace GXCMCBedrockServerManager.Forms
         private System.Windows.Forms.TextBox FirstJoinedTextBos;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button RestartButton;
+        private System.Windows.Forms.NumericUpDown RestartTimerNumberInput;
+        private System.Windows.Forms.NumericUpDown StopTimerNumberInput;
     }
 }

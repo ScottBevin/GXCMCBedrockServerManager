@@ -46,6 +46,9 @@
   <ItemGroup>
     <Compile Include="Files\PermissionsFile.cs" />
     <Compile Include="Files\WhitelistFile.cs" />
+    <Compile Include="Tasks\ActionCountdownTask.cs" />
+    <Compile Include="Tasks\RequestServerRestartTask.cs" />
+    <Compile Include="Tasks\RequestServerStopTask.cs" />
     <Compile Include="Tasks\RequestServerStartTask.cs" />
     <Compile Include="Tasks\ServerControlTask.cs" />
     <Compile Include="ServerEnums.cs" />

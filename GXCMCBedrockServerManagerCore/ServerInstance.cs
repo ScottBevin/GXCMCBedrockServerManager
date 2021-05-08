@@ -116,7 +116,6 @@ namespace GXCMCBedrockServerManagerCore
                         {
                             State = ServerState.Idle;
 
-                            RunningServerProcess.Kill();
                             RunningServerProcess = null;
 
                             ShutDownTaskHndl = null;
@@ -152,7 +151,7 @@ namespace GXCMCBedrockServerManagerCore
             return false;
         }
 
-        public bool Stop()
+        public bool Stop(int countdownTimer)
         {
             if (State != ServerState.Running)
             {
@@ -168,20 +167,39 @@ namespace GXCMCBedrockServerManagerCore
                 return false;
             }
 
-            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            if(countdownTimer > 0)
             {
-                Task = new ShutDownServerTask()
-            });
+                var hndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new ActionCountdownTask()
+                    {
+                        CountdownSeconds = countdownTimer,
+                        CountdownMessage = "Server shutdown in [TIME]"
+                    },
 
-            if (ShutDownTaskHndl == null)
+                    OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                    {
+                        Task = new RequestServerStopTask()
+                    }
+                });
+            }
+            else
             {
-                Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
+                ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new ShutDownServerTask()
+                });
+
+                if (ShutDownTaskHndl == null)
+                {
+                    Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
+                }
             }
 
             return true;
         }
 
-        public bool Restart()
+        public bool Restart(int countdownTimer)
         {
             if (State != ServerState.Running)
             {
@@ -199,18 +217,37 @@ namespace GXCMCBedrockServerManagerCore
                 return false;
             }
 
-            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            if (countdownTimer > 0)
             {
-                Task = new ShutDownServerTask(),
-                OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                var hndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
                 {
-                    Task = new RequestServerStartTask()
-                }
-            });
+                    Task = new ActionCountdownTask()
+                    {
+                        CountdownSeconds = countdownTimer,
+                        CountdownMessage = "Server restart in [TIME]"
+                    },
 
-            if (ShutDownTaskHndl == null)
+                    OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                    {
+                        Task = new RequestServerRestartTask()
+                    }
+                });
+            }
+            else
             {
-                Log.LogWarning("Failed to queue server shutdown task, aborting restart");
+                ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new ShutDownServerTask(),
+                    OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                    {
+                        Task = new RequestServerStartTask()
+                    }
+                });
+
+                if (ShutDownTaskHndl == null)
+                {
+                    Log.LogWarning("Failed to queue server shutdown task, aborting restart");
+                }
             }
 
             return true;
