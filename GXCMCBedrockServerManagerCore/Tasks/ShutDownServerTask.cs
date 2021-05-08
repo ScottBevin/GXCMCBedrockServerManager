@@ -14,8 +14,13 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             server.UnregisterOutputHandler(QuitOutputHandler);
         }
 
-        public void OnStarted(ServerInstance server)
+        public TaskCompletionState OnStarted(ServerInstance server)
         {
+            if(!server.Stop_Internal())
+            {
+                return TaskCompletionState.CompletedFailure;
+            }
+
             QuitOutputHandler = new ServerInstance.OutputHandler()
             {
                 RegexPattern = new Regex("Quit correctly", RegexOptions.Multiline),
@@ -25,6 +30,8 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             server.RegisterOutputHandler(QuitOutputHandler);
 
             server.RunCommand("STOP");
+
+            return TaskCompletionState.NotCompleted;
         }
 
         void OutputHandler_ServerQuit(Match match)
@@ -32,9 +39,14 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             ShutdownComplete = true;
         }
 
-        public bool OnUpdate(ServerInstance server)
+        public TaskCompletionState OnUpdate(ServerInstance server)
         {
-            return ShutdownComplete;
+            if (ShutdownComplete)
+            {
+                return TaskCompletionState.CompletedSuccess;
+            }
+
+            return TaskCompletionState.NotCompleted;
         }
     }
 }

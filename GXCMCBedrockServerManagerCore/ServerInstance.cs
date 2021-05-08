@@ -49,6 +49,7 @@ namespace GXCMCBedrockServerManagerCore
 
         ServerTaskController TaskController { get; set; } = new ServerTaskController();
 
+        ServerTaskController.TaskHandle StartupTaskHndl { get; set; } = null;
         ServerTaskController.TaskHandle ShutDownTaskHndl { get; set; } = null;
 
         public void Initialise(string path, ServerManager serverMgr)
@@ -84,8 +85,6 @@ namespace GXCMCBedrockServerManagerCore
                 return;
             }
 
-            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Server started", RegexOptions.Multiline), Callback = OutputHandler_ServerStarted });
-
             State = ServerState.Idle;
         }
 
@@ -95,12 +94,31 @@ namespace GXCMCBedrockServerManagerCore
 
             switch(State)
             {
-                case ServerState.Stopping:
+                case ServerState.Starting:
                     {
-                        if (ShutDownTaskHndl == null || ShutDownTaskHndl.IsComplete)
+                        if(StartupTaskHndl == null || StartupTaskHndl.CompletionState == TaskCompletionState.CompletedFailure)
                         {
                             State = ServerState.Idle;
+                            RunningServerProcess.Kill();
                             RunningServerProcess = null;
+                        }
+                        else if(StartupTaskHndl.CompletionState == TaskCompletionState.CompletedSuccess)
+                        {
+                            State = ServerState.Running;
+                            StartupTaskHndl = null;
+                        }
+
+                    } break;
+
+                case ServerState.Stopping:
+                    {
+                        if (ShutDownTaskHndl == null || ShutDownTaskHndl.CompletionState != TaskCompletionState.NotCompleted)
+                        {
+                            State = ServerState.Idle;
+
+                            RunningServerProcess.Kill();
+                            RunningServerProcess = null;
+
                             ShutDownTaskHndl = null;
 
                             Log.LogSectionHeader("Stopped");
@@ -113,61 +131,83 @@ namespace GXCMCBedrockServerManagerCore
 
         public bool Start()
         {
-            Log.BeginStreamingToFile(ServerPath);
-
-            if (State != ServerState.Idle)
+            if (State == ServerState.Idle && RunningServerProcess == null && StartupTaskHndl == null)
             {
-                Log.LogError($"Server start requested when not idle, Current State = {State}");
+                StartupTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new StartServerTask()
+                });
 
-                return false;
+                if (StartupTaskHndl == null)
+                {
+                    Log.LogWarning("Failed to queue server start task, aborting startup");
+                    State = ServerState.Idle;
+
+                    return false;
+                }
+
+                return true;
             }
 
-            Log.LogChapterHeader($"Starting Server - {DateTime.Now}");
-            Log.LogSectionHeader("Initialising");
-
-            string executableName = Path.Combine(ServerPath, ServerManager.GlobalSettings.ServerExecutableFileName);
-            if (!File.Exists(executableName))
-            {
-                Log.LogError($"Cannot start server - {ServerManager.GlobalSettings.ServerExecutableFileName} is missing.");
-
-                return false;
-            }
-
-            State = ServerState.Starting;
-
-            RunningServerProcess = new Process();
-
-            RunningServerProcess.StartInfo = new ProcessStartInfo
-            {
-                UseShellExecute = false,
-                CreateNoWindow = !ServerSettings.ShowOutputConsoleWindow,
-
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                RedirectStandardInput = true,
-
-                FileName = executableName
-            };
-
-            RunningServerProcess.OutputDataReceived += new DataReceivedEventHandler(ProcessOutputHandler);
-            RunningServerProcess.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
-
-            RunningServerProcess.Start();
-
-            RunningServerProcess.BeginOutputReadLine();
-            RunningServerProcess.BeginErrorReadLine();
-
-            return true;
+            return false;
         }
 
-        public bool Stop()
+        internal bool Start_Internal()
         {
-            // If we are starting up we need to block and wait...
-            while(State == ServerState.Starting)
+            if (State == ServerState.Idle && RunningServerProcess == null)
             {
+                Log.BeginStreamingToFile(ServerPath);
 
+                if (State != ServerState.Idle)
+                {
+                    Log.LogError($"Server start requested when not idle, Current State = {State}");
+
+                    return false;
+                }
+
+                Log.LogChapterHeader($"Starting Server - {DateTime.Now}");
+                Log.LogSectionHeader("Initialising");
+
+                State = ServerState.Starting;
+
+                RunningServerProcess = new Process();
+
+                string executableName = Path.Combine(ServerPath, ServerManager.GlobalSettings.ServerExecutableFileName);
+                if (!File.Exists(executableName))
+                {
+                    Log.LogError($"Cannot start server - {ServerManager.GlobalSettings.ServerExecutableFileName} is missing.");
+
+                    return false;
+                }
+
+                RunningServerProcess.StartInfo = new ProcessStartInfo
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = !ServerSettings.ShowOutputConsoleWindow,
+
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardInput = true,
+
+                    FileName = executableName
+                };
+
+                RunningServerProcess.OutputDataReceived += new DataReceivedEventHandler(ProcessOutputHandler);
+                RunningServerProcess.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
+
+                RunningServerProcess.Start();
+
+                RunningServerProcess.BeginOutputReadLine();
+                RunningServerProcess.BeginErrorReadLine();
+
+                return true;
             }
 
+            return false;
+        }
+
+        public bool Stop()   
+        {
             if (State != ServerState.Running)
             {
                 Log.LogWarning($"Server stop requested when not running, Current State = {State}");
@@ -175,28 +215,34 @@ namespace GXCMCBedrockServerManagerCore
                 return false;
             }
 
-            Log.LogSectionHeader("Stopping");
-
-            State = ServerState.Stopping;
-
-            if (RunningServerProcess == null)
+            if(ShutDownTaskHndl != null)
             {
-                Log.LogError($"Server stop requested while running with no process.");
-
-                State = ServerState.Idle;
-                return true;
+                Log.LogWarning("Server shutdown already requested");
             }
 
-            ShutDownServerTask shutdownTask = new ShutDownServerTask();
             ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
             {
-                Task = shutdownTask
+                Task = new ShutDownServerTask()
             });
 
             if (ShutDownTaskHndl == null)
             {
                 Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
             }
+
+            return true;
+        }
+
+        internal bool Stop_Internal()
+        {
+            if(State != ServerState.Running)
+            {
+                return false;
+            }
+
+            Log.LogSectionHeader("Stopping");
+
+            State = ServerState.Stopping;
 
             return true;
         }
@@ -257,18 +303,6 @@ namespace GXCMCBedrockServerManagerCore
             {
                 Log.LogError(outLine.Data);
             }
-        }
-
-        void OutputHandler_ServerStarted(Match match)
-        {
-            if (State != ServerState.Starting)
-            {
-                Log.LogError($"Server start output found, but server not starting. Current State = {State}");
-            }
-
-            Log.LogSectionHeader("Running");
-
-            State = ServerState.Running;
         }
 
         #endregion

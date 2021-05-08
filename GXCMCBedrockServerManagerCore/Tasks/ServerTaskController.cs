@@ -13,7 +13,8 @@ namespace GXCMCBedrockServerManagerCore.Tasks
         public class TaskCreationParams
         {
             public ServerControlTask Task { get; set; } = null;
-            public TaskCreationParams OnCompleteTask { get; set; } = null;
+            public TaskCreationParams OnSuccessTask { get; set; } = null;
+            public TaskCreationParams OnFailTask { get; set; } = null;
             public DateTime TaskScheduleTime { get; set; } = new DateTime(0);
         }
 
@@ -21,7 +22,7 @@ namespace GXCMCBedrockServerManagerCore.Tasks
         {
             public TaskCreationParams Params { get; internal set; }
             public bool IsRunning { get; internal set; } = false;
-            public bool IsComplete { get; internal set; } = false;
+            public TaskCompletionState CompletionState { get; internal set; } = TaskCompletionState.NotCompleted;
         }
 
         List<TaskHandle> PendingTasks { get; set; } = new List<TaskHandle>();
@@ -52,22 +53,38 @@ namespace GXCMCBedrockServerManagerCore.Tasks
                     ActiveTask = TasksWaitingToRun[0];
                     TasksWaitingToRun.RemoveAt(0);
 
-                    ActiveTask.Params.Task.OnStarted(Server);
                     ActiveTask.IsRunning = true;
+
+                    ActiveTask.CompletionState = ActiveTask.Params.Task.OnStarted(Server);
                 }
             }
 
             if(ActiveTask != null)
             {
-                if(ActiveTask.Params.Task.OnUpdate(Server))
+                var result = ActiveTask.CompletionState == TaskCompletionState.NotCompleted ?
+                    ActiveTask.Params.Task.OnUpdate(Server) :
+                    ActiveTask.CompletionState;
+
+                if (result != TaskCompletionState.NotCompleted)
                 {
                     ActiveTask.Params.Task.OnFinished(Server);
-                    ActiveTask.IsRunning = false;
-                    ActiveTask.IsComplete = true;
+                    ActiveTask.CompletionState = result;
 
-                    if(ActiveTask.Params.OnCompleteTask != null)
+                    ActiveTask.IsRunning = false;
+
+                    if (ActiveTask.CompletionState == TaskCompletionState.CompletedSuccess)
                     {
-                        QueueTask(ActiveTask.Params.OnCompleteTask);
+                        if (ActiveTask.Params.OnSuccessTask != null)
+                        {
+                            QueueTask(ActiveTask.Params.OnSuccessTask);
+                        }
+                    }
+                    else
+                    {
+                        if (ActiveTask.Params.OnFailTask != null)
+                        {
+                            QueueTask(ActiveTask.Params.OnFailTask);
+                        }
                     }
 
                     ActiveTask = null;
