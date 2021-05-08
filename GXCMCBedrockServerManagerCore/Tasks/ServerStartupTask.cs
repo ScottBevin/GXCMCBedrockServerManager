@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GXCMCBedrockServerManagerCore.Tasks
 {
-    class StartServerTask : ServerControlTask
+    class ServerStartupTask : ServerControlTask
     {
         ServerInstance.OutputHandler StartupOutputHandler { get; set; }
 

@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Files\PermissionsFile.cs" />
     <Compile Include="Files\WhitelistFile.cs" />
+    <Compile Include="Tasks\RequestServerStartTask.cs" />
     <Compile Include="Tasks\ServerControlTask.cs" />
     <Compile Include="ServerEnums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,7 +58,7 @@
     <Compile Include="ServerPlayers.cs" />
     <Compile Include="Tasks\ServerTaskController.cs" />
     <Compile Include="Tasks\ShutDownServerTask.cs" />
-    <Compile Include="Tasks\StartServerTask.cs" />
+    <Compile Include="Tasks\ServerStartupTask.cs" />
     <Compile Include="Utils\ErrorHandler.cs" />
     <Compile Include="Utils\JsonFile.cs" />
     <Compile Include="Utils\Logger.cs" />

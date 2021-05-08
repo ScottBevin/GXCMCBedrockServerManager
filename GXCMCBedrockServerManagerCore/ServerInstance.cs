@@ -135,7 +135,7 @@ namespace GXCMCBedrockServerManagerCore
             {
                 StartupTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
                 {
-                    Task = new StartServerTask()
+                    Task = new ServerStartupTask()
                 });
 
                 if (StartupTaskHndl == null)
@@ -151,6 +151,100 @@ namespace GXCMCBedrockServerManagerCore
 
             return false;
         }
+
+        public bool Stop()
+        {
+            if (State != ServerState.Running)
+            {
+                Log.LogWarning($"Server stop requested when not running, Current State = {State}");
+
+                return false;
+            }
+
+            if (ShutDownTaskHndl != null)
+            {
+                Log.LogWarning("Server shutdown already requested");
+
+                return false;
+            }
+
+            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            {
+                Task = new ShutDownServerTask()
+            });
+
+            if (ShutDownTaskHndl == null)
+            {
+                Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
+            }
+
+            return true;
+        }
+
+        public bool Restart()
+        {
+            if (State != ServerState.Running)
+            {
+                Log.LogWarning($"Server restart requested when not running, Current State = {State}");
+
+                return false;
+            }
+
+            Log.LogInfo("Server restart requested.");
+
+            if (ShutDownTaskHndl != null)
+            {
+                Log.LogWarning("Server shutdown already requested");
+
+                return false;
+            }
+
+            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            {
+                Task = new ShutDownServerTask(),
+                OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new RequestServerStartTask()
+                }
+            });
+
+            if (ShutDownTaskHndl == null)
+            {
+                Log.LogWarning("Failed to queue server shutdown task, aborting restart");
+            }
+
+            return true;
+        }
+
+        public void SendServerMessage(string message)
+        {
+            if(RunningServerProcess != null && State == ServerState.Running && !string.IsNullOrEmpty(message))
+            {
+                Log.LogInfo($"Sending server message: {message}");
+                RunningServerProcess.StandardInput.WriteLine($"say {message}");
+            }
+        }
+
+        public void RunCommand(string command)
+        {
+            if (RunningServerProcess != null && !string.IsNullOrEmpty(command))
+            {
+                Log.LogInfo($"Running Command: {command}");
+                RunningServerProcess.StandardInput.WriteLine(command);
+            }
+        }
+
+        public void RegisterOutputHandler(OutputHandler outputHndl)
+        {
+            OutputRegexCallbacks.Add(outputHndl);
+        }
+
+        public void UnregisterOutputHandler(OutputHandler outputHndl)
+        {
+            OutputRegexCallbacks.Remove(outputHndl);
+        }
+
+        #endregion
 
         internal bool Start_Internal()
         {
@@ -206,36 +300,9 @@ namespace GXCMCBedrockServerManagerCore
             return false;
         }
 
-        public bool Stop()   
-        {
-            if (State != ServerState.Running)
-            {
-                Log.LogWarning($"Server stop requested when not running, Current State = {State}");
-
-                return false;
-            }
-
-            if(ShutDownTaskHndl != null)
-            {
-                Log.LogWarning("Server shutdown already requested");
-            }
-
-            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
-            {
-                Task = new ShutDownServerTask()
-            });
-
-            if (ShutDownTaskHndl == null)
-            {
-                Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
-            }
-
-            return true;
-        }
-
         internal bool Stop_Internal()
         {
-            if(State != ServerState.Running)
+            if (State != ServerState.Running)
             {
                 return false;
             }
@@ -247,35 +314,6 @@ namespace GXCMCBedrockServerManagerCore
             return true;
         }
 
-        public void SendServerMessage(string message)
-        {
-            if(RunningServerProcess != null && State == ServerState.Running && !string.IsNullOrEmpty(message))
-            {
-                Log.LogInfo($"Sending server message: {message}");
-                RunningServerProcess.StandardInput.WriteLine($"say {message}");
-            }
-        }
-
-        public void RunCommand(string command)
-        {
-            if (RunningServerProcess != null && !string.IsNullOrEmpty(command))
-            {
-                Log.LogInfo($"Running Command: {command}");
-                RunningServerProcess.StandardInput.WriteLine(command);
-            }
-        }
-
-        public void RegisterOutputHandler(OutputHandler outputHndl)
-        {
-            OutputRegexCallbacks.Add(outputHndl);
-        }
-
-        public void UnregisterOutputHandler(OutputHandler outputHndl)
-        {
-            OutputRegexCallbacks.Remove(outputHndl);
-        }
-
-        #endregion
 
         #region Output Handling
 

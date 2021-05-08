@@ -306,5 +306,10 @@ namespace GXCMCBedrockServerManager.Forms
                 UpdateSelectedPlayerInfo();
             }
         }
+
+        private void RestartButton_Click(object sender, EventArgs e)
+        {
+            ServerInstance.Restart();
+        }
     }
 }
