@@ -85,8 +85,6 @@ namespace GXCMCBedrockServerManagerCore
             }
 
             OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Server started", RegexOptions.Multiline), Callback = OutputHandler_ServerStarted });
-            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Player connected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerConnected });
-            OutputRegexCallbacks.Add(new OutputHandler() { RegexPattern = new Regex("Player disconnected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerDisconnected });
 
             State = ServerState.Idle;
         }
@@ -271,43 +269,6 @@ namespace GXCMCBedrockServerManagerCore
             Log.LogSectionHeader("Running");
 
             State = ServerState.Running;
-        }
-        void OutputHandler_PlayerConnected(Match match)
-        {
-            string s = match.ToString();
-
-            int colonIdx = s.IndexOf(':') + 1;
-            int commaIdx = s.IndexOf(',');
-
-            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
-
-            Log.LogInfo($"Player Joined: {s}");
-
-            ServerPlayers.Player player = Players.FindPlayerByName(s);
-
-            if(player != null)
-            {
-                Players.NotifyPlayerJoinedServer(player);
-            }
-        }
-
-        void OutputHandler_PlayerDisconnected(Match match)
-        {
-            string s = match.ToString();
-
-            int colonIdx = s.IndexOf(':') + 1;
-            int commaIdx = s.IndexOf(',');
-
-            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
-
-            Log.LogInfo($"Player Left: {s}");
-
-            ServerPlayers.Player player = Players.FindPlayerByName(s);
-
-            if (player != null)
-            {
-                Players.NotifyPlayerLeftServer(player);
-            }
         }
 
         #endregion

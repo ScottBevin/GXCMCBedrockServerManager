@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace GXCMCBedrockServerManagerCore
 {
@@ -53,7 +54,10 @@ namespace GXCMCBedrockServerManagerCore
         {
             Server = parent;
 
-            if(!Reload())
+            Server.RegisterOutputHandler(new ServerInstance.OutputHandler() { RegexPattern = new Regex("Player connected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerConnected });
+            Server.RegisterOutputHandler(new ServerInstance.OutputHandler() { RegexPattern = new Regex("Player disconnected.*$", RegexOptions.Multiline), Callback = OutputHandler_PlayerDisconnected });
+
+            if (!Reload())
             {
                 return false;
             }
@@ -241,6 +245,44 @@ namespace GXCMCBedrockServerManagerCore
         public void NotifyPlayerLeftServer(Player player)
         {
             player.IsOnline = false;
+        }
+
+        void OutputHandler_PlayerConnected(Match match)
+        {
+            string s = match.ToString();
+
+            int colonIdx = s.IndexOf(':') + 1;
+            int commaIdx = s.IndexOf(',');
+
+            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
+
+            Server.Log.LogInfo($"Player Joined: {s}");
+
+            ServerPlayers.Player player = FindPlayerByName(s);
+
+            if (player != null)
+            {
+                NotifyPlayerJoinedServer(player);
+            }
+        }
+
+        void OutputHandler_PlayerDisconnected(Match match)
+        {
+            string s = match.ToString();
+
+            int colonIdx = s.IndexOf(':') + 1;
+            int commaIdx = s.IndexOf(',');
+
+            s = s.Substring(colonIdx, commaIdx - colonIdx).Trim();
+
+            Server.Log.LogInfo($"Player Left: {s}");
+
+            ServerPlayers.Player player = FindPlayerByName(s);
+
+            if (player != null)
+            {
+                NotifyPlayerLeftServer(player);
+            }
         }
     }
 }
