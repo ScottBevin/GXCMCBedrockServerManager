@@ -84,7 +84,7 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             }
         }
 
-        public void QueueTask(TaskCreationParams taskParams)
+        public TaskHandle QueueTask(TaskCreationParams taskParams)
         {
             if (taskParams != null & taskParams.Task != null)
             {
@@ -104,7 +104,11 @@ namespace GXCMCBedrockServerManagerCore.Tasks
                         PendingTasks.Add(hndl);
                     }
                 }
+
+                return hndl;
             }
+
+            return null;
         }
     }
 }

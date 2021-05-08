@@ -23,15 +23,11 @@ namespace GXCMCBedrockServerManagerCore
 
         public string ServerPath { get; private set; } = "";
 
-        ServerManager ServerManager { get; set; } = null;
-
         public ServerSettingsFile ServerSettings { get; private set; } = null;
 
         public ServerPropertiesFile ServerProperties { get; private set; } = null;
 
         public ServerState State { get; private set; } = ServerState.NotInitialised;
-
-        Process RunningServerProcess = null;
 
         public Logger Log { get; private set; } = new Logger();
 
@@ -43,11 +39,17 @@ namespace GXCMCBedrockServerManagerCore
             public RegexMatchCallbackDelegate Callback { get; set; }
         }
 
-        List<OutputHandler> OutputRegexCallbacks = new List<OutputHandler>();
-
         public ServerPlayers Players { get; private set; } = new ServerPlayers();
 
+        ServerManager ServerManager { get; set; } = null;
+
+        List<OutputHandler> OutputRegexCallbacks = new List<OutputHandler>();
+
+        Process RunningServerProcess = null;
+
         ServerTaskController TaskController { get; set; } = new ServerTaskController();
+
+        ServerTaskController.TaskHandle ShutDownTaskHndl { get; set; } = null;
 
         public void Initialise(string path, ServerManager serverMgr)
         {
@@ -97,15 +99,14 @@ namespace GXCMCBedrockServerManagerCore
             {
                 case ServerState.Stopping:
                     {
-                        //if (State != ServerState.Stopping)
-                        //{
-                        //    Log.LogError($"Server stop output found, but server not stopping. Current State = {State}");
-                        //}
-                        //
-                        //State = ServerState.Idle;
-                        //RunningServerProcess = null;
-                        //
-                        //Log.LogSectionHeader("Stopped");
+                        if (ShutDownTaskHndl == null || ShutDownTaskHndl.IsComplete)
+                        {
+                            State = ServerState.Idle;
+                            RunningServerProcess = null;
+                            ShutDownTaskHndl = null;
+
+                            Log.LogSectionHeader("Stopped");
+                        }
                     } break;
             }
         }
@@ -189,10 +190,15 @@ namespace GXCMCBedrockServerManagerCore
             }
 
             ShutDownServerTask shutdownTask = new ShutDownServerTask();
-            TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+            ShutDownTaskHndl = TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
             {
                 Task = shutdownTask
             });
+
+            if (ShutDownTaskHndl == null)
+            {
+                Log.LogWarning("Failed to queue server shutdown task, aborting shutdown");
+            }
 
             return true;
         }
@@ -266,7 +272,6 @@ namespace GXCMCBedrockServerManagerCore
 
             State = ServerState.Running;
         }
-
         void OutputHandler_PlayerConnected(Match match)
         {
             string s = match.ToString();
