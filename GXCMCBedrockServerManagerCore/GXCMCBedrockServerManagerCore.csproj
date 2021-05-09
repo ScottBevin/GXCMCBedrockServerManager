@@ -67,6 +67,7 @@
     <Compile Include="Files\WhitelistFile.cs" />
     <Compile Include="ServerBackups.cs" />
     <Compile Include="Tasks\ActionCountdownTask.cs" />
+    <Compile Include="Tasks\BackupsPruneTask.cs" />
     <Compile Include="Tasks\RequestServerRestartTask.cs" />
     <Compile Include="Tasks\RequestServerStopTask.cs" />
     <Compile Include="Tasks\RequestServerStartTask.cs" />

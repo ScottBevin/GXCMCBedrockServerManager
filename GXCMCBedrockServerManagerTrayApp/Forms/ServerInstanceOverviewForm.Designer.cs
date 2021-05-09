@@ -31,6 +31,7 @@ namespace GXCMCBedrockServerManager.Forms
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.TriggerBackupButton = new System.Windows.Forms.Button();
             this.RestartTimerNumberInput = new System.Windows.Forms.NumericUpDown();
             this.StopTimerNumberInput = new System.Windows.Forms.NumericUpDown();
             this.RestartButton = new System.Windows.Forms.Button();
@@ -75,8 +76,6 @@ namespace GXCMCBedrockServerManager.Forms
             this.AddNewPlayerTextBox = new System.Windows.Forms.TextBox();
             this.PlayerFilterTextBox = new System.Windows.Forms.TextBox();
             this.PlayersListBox = new System.Windows.Forms.ListBox();
-            this.Backups = new System.Windows.Forms.TabPage();
-            this.TriggerBackupButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).BeginInit();
@@ -92,7 +91,6 @@ namespace GXCMCBedrockServerManager.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.Backups);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -122,23 +120,33 @@ namespace GXCMCBedrockServerManager.Forms
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // TriggerBackupButton
+            // 
+            this.TriggerBackupButton.Location = new System.Drawing.Point(654, 492);
+            this.TriggerBackupButton.Name = "TriggerBackupButton";
+            this.TriggerBackupButton.Size = new System.Drawing.Size(126, 23);
+            this.TriggerBackupButton.TabIndex = 21;
+            this.TriggerBackupButton.Text = "Trigger Backup";
+            this.TriggerBackupButton.UseVisualStyleBackColor = true;
+            this.TriggerBackupButton.Click += new System.EventHandler(this.TriggerBackupButton_Click);
+            // 
             // RestartTimerNumberInput
             // 
-            this.RestartTimerNumberInput.Location = new System.Drawing.Point(838, 602);
+            this.RestartTimerNumberInput.Location = new System.Drawing.Point(654, 411);
             this.RestartTimerNumberInput.Name = "RestartTimerNumberInput";
             this.RestartTimerNumberInput.Size = new System.Drawing.Size(46, 20);
             this.RestartTimerNumberInput.TabIndex = 20;
             // 
             // StopTimerNumberInput
             // 
-            this.StopTimerNumberInput.Location = new System.Drawing.Point(705, 602);
+            this.StopTimerNumberInput.Location = new System.Drawing.Point(521, 411);
             this.StopTimerNumberInput.Name = "StopTimerNumberInput";
             this.StopTimerNumberInput.Size = new System.Drawing.Size(46, 20);
             this.StopTimerNumberInput.TabIndex = 19;
             // 
             // RestartButton
             // 
-            this.RestartButton.Location = new System.Drawing.Point(890, 599);
+            this.RestartButton.Location = new System.Drawing.Point(706, 408);
             this.RestartButton.Name = "RestartButton";
             this.RestartButton.Size = new System.Drawing.Size(75, 23);
             this.RestartButton.TabIndex = 18;
@@ -149,7 +157,7 @@ namespace GXCMCBedrockServerManager.Forms
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(190, 654);
+            this.label2.Location = new System.Drawing.Point(6, 463);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(82, 13);
             this.label2.TabIndex = 17;
@@ -157,7 +165,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // SendCommandButton
             // 
-            this.SendCommandButton.Location = new System.Drawing.Point(890, 654);
+            this.SendCommandButton.Location = new System.Drawing.Point(706, 463);
             this.SendCommandButton.Name = "SendCommandButton";
             this.SendCommandButton.Size = new System.Drawing.Size(75, 23);
             this.SendCommandButton.TabIndex = 16;
@@ -167,7 +175,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // SendCommandTextBox
             // 
-            this.SendCommandTextBox.Location = new System.Drawing.Point(274, 654);
+            this.SendCommandTextBox.Location = new System.Drawing.Point(90, 463);
             this.SendCommandTextBox.Name = "SendCommandTextBox";
             this.SendCommandTextBox.Size = new System.Drawing.Size(610, 20);
             this.SendCommandTextBox.TabIndex = 15;
@@ -175,7 +183,7 @@ namespace GXCMCBedrockServerManager.Forms
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(190, 628);
+            this.label1.Location = new System.Drawing.Point(6, 437);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(78, 13);
             this.label1.TabIndex = 14;
@@ -183,7 +191,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // SendMessageButton
             // 
-            this.SendMessageButton.Location = new System.Drawing.Point(890, 628);
+            this.SendMessageButton.Location = new System.Drawing.Point(706, 437);
             this.SendMessageButton.Name = "SendMessageButton";
             this.SendMessageButton.Size = new System.Drawing.Size(75, 23);
             this.SendMessageButton.TabIndex = 13;
@@ -193,14 +201,14 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // SendMessageTextBox
             // 
-            this.SendMessageTextBox.Location = new System.Drawing.Point(274, 628);
+            this.SendMessageTextBox.Location = new System.Drawing.Point(90, 437);
             this.SendMessageTextBox.Name = "SendMessageTextBox";
             this.SendMessageTextBox.Size = new System.Drawing.Size(610, 20);
             this.SendMessageTextBox.TabIndex = 12;
             // 
             // StopServerButton
             // 
-            this.StopServerButton.Location = new System.Drawing.Point(757, 599);
+            this.StopServerButton.Location = new System.Drawing.Point(573, 408);
             this.StopServerButton.Name = "StopServerButton";
             this.StopServerButton.Size = new System.Drawing.Size(75, 23);
             this.StopServerButton.TabIndex = 11;
@@ -210,7 +218,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // StartServerButton
             // 
-            this.StartServerButton.Location = new System.Drawing.Point(624, 599);
+            this.StartServerButton.Location = new System.Drawing.Point(440, 408);
             this.StartServerButton.Name = "StartServerButton";
             this.StartServerButton.Size = new System.Drawing.Size(75, 23);
             this.StartServerButton.TabIndex = 10;
@@ -220,7 +228,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // OutputTextBox
             // 
-            this.OutputTextBox.Location = new System.Drawing.Point(190, 197);
+            this.OutputTextBox.Location = new System.Drawing.Point(6, 6);
             this.OutputTextBox.Multiline = true;
             this.OutputTextBox.Name = "OutputTextBox";
             this.OutputTextBox.Size = new System.Drawing.Size(775, 394);
@@ -547,26 +555,6 @@ namespace GXCMCBedrockServerManager.Forms
             this.PlayersListBox.TabIndex = 0;
             this.PlayersListBox.SelectedIndexChanged += new System.EventHandler(this.PlayersListBox_SelectedIndexChanged);
             // 
-            // Backups
-            // 
-            this.Backups.Location = new System.Drawing.Point(4, 22);
-            this.Backups.Name = "Backups";
-            this.Backups.Padding = new System.Windows.Forms.Padding(3);
-            this.Backups.Size = new System.Drawing.Size(1623, 875);
-            this.Backups.TabIndex = 2;
-            this.Backups.Text = "Backups";
-            this.Backups.UseVisualStyleBackColor = true;
-            // 
-            // TriggerBackupButton
-            // 
-            this.TriggerBackupButton.Location = new System.Drawing.Point(676, 761);
-            this.TriggerBackupButton.Name = "TriggerBackupButton";
-            this.TriggerBackupButton.Size = new System.Drawing.Size(75, 23);
-            this.TriggerBackupButton.TabIndex = 21;
-            this.TriggerBackupButton.Text = "Trigger Backup";
-            this.TriggerBackupButton.UseVisualStyleBackColor = true;
-            this.TriggerBackupButton.Click += new System.EventHandler(this.TriggerBackupButton_Click);
-            // 
             // ServerInstanceOverviewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -638,7 +626,6 @@ namespace GXCMCBedrockServerManager.Forms
         private System.Windows.Forms.Button RestartButton;
         private System.Windows.Forms.NumericUpDown RestartTimerNumberInput;
         private System.Windows.Forms.NumericUpDown StopTimerNumberInput;
-        private System.Windows.Forms.TabPage Backups;
         private System.Windows.Forms.Button TriggerBackupButton;
     }
 }

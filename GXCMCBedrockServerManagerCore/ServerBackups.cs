@@ -37,15 +37,20 @@ namespace GXCMCBedrockServerManagerCore
             public bool IsCompressed { get; set; }
             public List<BackupFile> Files { get; set; } = new List<BackupFile>();
 
+            public string FullPath { get; private set; }
+
             static string FileName { get; } = "BackupReceipt";
 
             public static BackupReceipt Load(string path)
             {
-                return LoadJsonFile(path, FileName, false);
+                BackupReceipt br = LoadJsonFile(path, FileName, false);
+                br.FullPath = Path.Combine(path, FileName);
+                return br;
             }
 
             public bool Save(string path)
             {
+                FullPath = Path.Combine(path, FileName);
                 return SaveJsonFile(this, path, FileName, false);
             }
         }
@@ -83,10 +88,39 @@ namespace GXCMCBedrockServerManagerCore
                 {
                     TargetDirectory = path,
                     Receipt = receipt
+                },
+                OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                {
+                    Task = new BackupsPruneTask()
                 }
             }) ;
 
             return (taskHandle != null);
+        }
+    
+        public List<BackupReceipt> LoadAllBackupReceipts()
+        {
+            List<BackupReceipt> returnList = new List<BackupReceipt>();
+
+            DirectoryInfo dir = new DirectoryInfo(Server.ServerSettings.Backups.BackupsPath.Replace("[SERVER_PATH]", Server.ServerPath));
+
+            foreach(var subdir in dir.GetDirectories())
+            {
+                BackupReceipt bp = BackupReceipt.Load(subdir.FullName);
+
+                if(bp != null)
+                {
+                    returnList.Add(bp);
+                }
+            }
+
+            return returnList;
+        }
+
+        public void DestroyBackup(BackupReceipt receipt)
+        {
+            string dirToDelete = Path.GetDirectoryName(receipt.FullPath);
+            Directory.Delete(Path.GetDirectoryName(receipt.FullPath), true);
         }
     }
 }
