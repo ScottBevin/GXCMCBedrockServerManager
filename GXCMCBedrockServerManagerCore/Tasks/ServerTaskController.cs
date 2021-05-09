@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GXCMCBedrockServerManagerCore.Tasks
 {
-    class ServerTaskController
+    public class ServerTaskController
     {
         ServerInstance Server { get; set; }
 

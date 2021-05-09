@@ -58,14 +58,17 @@ namespace GXCMCBedrockServerManagerCore.Utils
 
             bool renameOldSuccessful = false;
 
-            try
+            if (saveOld)
             {
-                File.Move(fullPath, fullOldPath);
-                renameOldSuccessful = true;
-            }
-            catch
-            {
+                try
+                {
+                    File.Move(fullPath, fullOldPath);
+                    renameOldSuccessful = true;
+                }
+                catch
+                {
 
+                }
             }
 
             try

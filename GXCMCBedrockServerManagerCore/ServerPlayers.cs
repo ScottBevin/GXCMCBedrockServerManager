@@ -247,9 +247,11 @@ namespace GXCMCBedrockServerManagerCore
             player.IsOnline = false;
         }
 
-        void OutputHandler_PlayerConnected(Match match)
+        void OutputHandler_PlayerConnected(ServerInstance server, string output)
         {
-            string s = match.ToString();
+            // todo, parse xuid
+
+            string s = output;
 
             int colonIdx = s.IndexOf(':') + 1;
             int commaIdx = s.IndexOf(',');
@@ -266,9 +268,9 @@ namespace GXCMCBedrockServerManagerCore
             }
         }
 
-        void OutputHandler_PlayerDisconnected(Match match)
+        void OutputHandler_PlayerDisconnected(ServerInstance server, string output)
         {
-            string s = match.ToString();
+            string s = output;
 
             int colonIdx = s.IndexOf(':') + 1;
             int commaIdx = s.IndexOf(',');

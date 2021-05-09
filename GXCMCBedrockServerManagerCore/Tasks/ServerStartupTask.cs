@@ -46,7 +46,7 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             return TaskCompletionState.NotCompleted;
         }
 
-        void OutputHandler_ServerStarted(Match match)
+        void OutputHandler_ServerStarted(ServerInstance server, string output)
         {
             StartupComplete = true;
         }

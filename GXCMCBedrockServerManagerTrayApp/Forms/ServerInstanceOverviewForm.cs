@@ -311,5 +311,10 @@ namespace GXCMCBedrockServerManager.Forms
         {
             ServerInstance.Restart((int)RestartTimerNumberInput.Value);
         }
+
+        private void TriggerBackupButton_Click(object sender, EventArgs e)
+        {
+            ServerInstance.Backups.TriggerBackup();
+        }
     }
 }

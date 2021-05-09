@@ -31,6 +31,8 @@ namespace GXCMCBedrockServerManager.Forms
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.RestartTimerNumberInput = new System.Windows.Forms.NumericUpDown();
+            this.StopTimerNumberInput = new System.Windows.Forms.NumericUpDown();
             this.RestartButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.SendCommandButton = new System.Windows.Forms.Button();
@@ -73,14 +75,14 @@ namespace GXCMCBedrockServerManager.Forms
             this.AddNewPlayerTextBox = new System.Windows.Forms.TextBox();
             this.PlayerFilterTextBox = new System.Windows.Forms.TextBox();
             this.PlayersListBox = new System.Windows.Forms.ListBox();
-            this.StopTimerNumberInput = new System.Windows.Forms.NumericUpDown();
-            this.RestartTimerNumberInput = new System.Windows.Forms.NumericUpDown();
+            this.Backups = new System.Windows.Forms.TabPage();
+            this.TriggerBackupButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -90,6 +92,7 @@ namespace GXCMCBedrockServerManager.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.Backups);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -98,6 +101,7 @@ namespace GXCMCBedrockServerManager.Forms
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.TriggerBackupButton);
             this.tabPage1.Controls.Add(this.RestartTimerNumberInput);
             this.tabPage1.Controls.Add(this.StopTimerNumberInput);
             this.tabPage1.Controls.Add(this.RestartButton);
@@ -117,6 +121,20 @@ namespace GXCMCBedrockServerManager.Forms
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // RestartTimerNumberInput
+            // 
+            this.RestartTimerNumberInput.Location = new System.Drawing.Point(838, 602);
+            this.RestartTimerNumberInput.Name = "RestartTimerNumberInput";
+            this.RestartTimerNumberInput.Size = new System.Drawing.Size(46, 20);
+            this.RestartTimerNumberInput.TabIndex = 20;
+            // 
+            // StopTimerNumberInput
+            // 
+            this.StopTimerNumberInput.Location = new System.Drawing.Point(705, 602);
+            this.StopTimerNumberInput.Name = "StopTimerNumberInput";
+            this.StopTimerNumberInput.Size = new System.Drawing.Size(46, 20);
+            this.StopTimerNumberInput.TabIndex = 19;
             // 
             // RestartButton
             // 
@@ -529,19 +547,25 @@ namespace GXCMCBedrockServerManager.Forms
             this.PlayersListBox.TabIndex = 0;
             this.PlayersListBox.SelectedIndexChanged += new System.EventHandler(this.PlayersListBox_SelectedIndexChanged);
             // 
-            // StopTimerNumberInput
+            // Backups
             // 
-            this.StopTimerNumberInput.Location = new System.Drawing.Point(705, 602);
-            this.StopTimerNumberInput.Name = "StopTimerNumberInput";
-            this.StopTimerNumberInput.Size = new System.Drawing.Size(46, 20);
-            this.StopTimerNumberInput.TabIndex = 19;
+            this.Backups.Location = new System.Drawing.Point(4, 22);
+            this.Backups.Name = "Backups";
+            this.Backups.Padding = new System.Windows.Forms.Padding(3);
+            this.Backups.Size = new System.Drawing.Size(1623, 875);
+            this.Backups.TabIndex = 2;
+            this.Backups.Text = "Backups";
+            this.Backups.UseVisualStyleBackColor = true;
             // 
-            // RestartTimerNumberInput
+            // TriggerBackupButton
             // 
-            this.RestartTimerNumberInput.Location = new System.Drawing.Point(838, 602);
-            this.RestartTimerNumberInput.Name = "RestartTimerNumberInput";
-            this.RestartTimerNumberInput.Size = new System.Drawing.Size(46, 20);
-            this.RestartTimerNumberInput.TabIndex = 20;
+            this.TriggerBackupButton.Location = new System.Drawing.Point(676, 761);
+            this.TriggerBackupButton.Name = "TriggerBackupButton";
+            this.TriggerBackupButton.Size = new System.Drawing.Size(75, 23);
+            this.TriggerBackupButton.TabIndex = 21;
+            this.TriggerBackupButton.Text = "Trigger Backup";
+            this.TriggerBackupButton.UseVisualStyleBackColor = true;
+            this.TriggerBackupButton.Click += new System.EventHandler(this.TriggerBackupButton_Click);
             // 
             // ServerInstanceOverviewForm
             // 
@@ -556,12 +580,12 @@ namespace GXCMCBedrockServerManager.Forms
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.StopTimerNumberInput)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RestartTimerNumberInput)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -614,5 +638,7 @@ namespace GXCMCBedrockServerManager.Forms
         private System.Windows.Forms.Button RestartButton;
         private System.Windows.Forms.NumericUpDown RestartTimerNumberInput;
         private System.Windows.Forms.NumericUpDown StopTimerNumberInput;
+        private System.Windows.Forms.TabPage Backups;
+        private System.Windows.Forms.Button TriggerBackupButton;
     }
 }

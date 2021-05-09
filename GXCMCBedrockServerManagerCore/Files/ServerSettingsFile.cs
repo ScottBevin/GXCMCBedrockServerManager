@@ -6,6 +6,7 @@ namespace GXCMCBedrockServerManagerCore.Files
     {
         public bool ShowOutputConsoleWindow { get; set; } = false;
         public ServerPlayers.ServerPlayersSettings Players { get; set; } = new ServerPlayers.ServerPlayersSettings();
+        public ServerBackups.ServerBackupSettings Backups { get; set; } = new ServerBackups.ServerBackupSettings();
 
         public static ServerSettingsFile Load(string path, string fileName)
         {

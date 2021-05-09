@@ -34,7 +34,7 @@ namespace GXCMCBedrockServerManagerCore.Tasks
             return TaskCompletionState.NotCompleted;
         }
 
-        void OutputHandler_ServerQuit(Match match)
+        void OutputHandler_ServerQuit(ServerInstance server, string output)
         {
             ShutdownComplete = true;
         }

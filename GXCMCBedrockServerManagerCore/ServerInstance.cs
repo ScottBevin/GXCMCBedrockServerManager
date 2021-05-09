@@ -31,23 +31,25 @@ namespace GXCMCBedrockServerManagerCore
 
         public Logger Log { get; private set; } = new Logger();
 
-        public class OutputHandler
-        {
-            public delegate void RegexMatchCallbackDelegate(Match regexMatch);
-
-            public Regex RegexPattern { get; set; }
-            public RegexMatchCallbackDelegate Callback { get; set; }
-        }
+        public ServerTaskController TaskController { get; private set; } = new ServerTaskController();
 
         public ServerPlayers Players { get; private set; } = new ServerPlayers();
 
-        ServerManager ServerManager { get; set; } = null;
+        public ServerBackups Backups { get; private set; } = new ServerBackups();
 
-        List<OutputHandler> OutputRegexCallbacks = new List<OutputHandler>();
+        ServerManager ServerManager { get; set; } = null;
+        public class OutputHandler
+        {
+            public delegate void CallbackDelegate(ServerInstance server, string output);
+
+            public Regex RegexPattern { get; set; }
+            public CallbackDelegate Callback { get; set; }
+        }
+
+        List<OutputHandler> OutputHandlers = new List<OutputHandler>();
+        OutputHandler.CallbackDelegate RedirectNextOutputCallback = null;
 
         Process RunningServerProcess = null;
-
-        ServerTaskController TaskController { get; set; } = new ServerTaskController();
 
         ServerTaskController.TaskHandle StartupTaskHndl { get; set; } = null;
         ServerTaskController.TaskHandle ShutDownTaskHndl { get; set; } = null;
@@ -80,6 +82,12 @@ namespace GXCMCBedrockServerManagerCore
             }
 
             if(!TaskController.Initialise(this))
+            {
+                State = ServerState.InitialisationError;
+                return;
+            }
+
+            if(!Backups.Initialise(this))
             {
                 State = ServerState.InitialisationError;
                 return;
@@ -273,12 +281,17 @@ namespace GXCMCBedrockServerManagerCore
 
         public void RegisterOutputHandler(OutputHandler outputHndl)
         {
-            OutputRegexCallbacks.Add(outputHndl);
+            OutputHandlers.Add(outputHndl);
         }
 
         public void UnregisterOutputHandler(OutputHandler outputHndl)
         {
-            OutputRegexCallbacks.Remove(outputHndl);
+            OutputHandlers.Remove(outputHndl);
+        }
+
+        public void RedirectNextOutput(OutputHandler.CallbackDelegate callback)
+        {
+            RedirectNextOutputCallback = callback;
         }
 
         #endregion
@@ -358,13 +371,21 @@ namespace GXCMCBedrockServerManagerCore
         {
             if (!string.IsNullOrEmpty(outLine.Data))
             {
-                foreach (var item in OutputRegexCallbacks)
+                if (RedirectNextOutputCallback != null)
                 {
-                    Match match = item.RegexPattern.Match(outLine.Data);
-
-                    if (match.Success)
+                    RedirectNextOutputCallback(this, outLine.Data);
+                    RedirectNextOutputCallback = null;
+                }
+                else
+                {
+                    foreach (var item in OutputHandlers)
                     {
-                        item.Callback(match);
+                        Match match = item.RegexPattern.Match(outLine.Data);
+
+                        if (match.Success)
+                        {
+                            item.Callback(this, match.Value);
+                        }
                     }
                 }
 
