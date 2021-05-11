@@ -18,8 +18,8 @@ namespace GXCMCBedrockServerManagerCore
             public bool CompressBackups { get; set; } = true;
             public int BackupsToKeep { get; set; } = 10;
             public bool BackupWorldOnAllPlayersLeave { get; set; } = true;
-            public int MinutesBetweenAutoBackups { get; set; } = 60 * 4;
-            public bool OnlyRunScheduledBackupsWhenSomeoneHasBeenOnline { get; set; } = true;
+            public double MinutesBetweenAutoBackups { get; set; } = 60.0 * 4.0;
+            public double BackupCooldownMinutes { get; set; } = 60.0;
         }
 
         public class BackupReceipt : Utils.JsonFile<BackupReceipt>
@@ -57,47 +57,79 @@ namespace GXCMCBedrockServerManagerCore
 
         ServerInstance Server { get; set; }
 
+        bool AnyPlayersOnlineSinceLastBackup { get; set; }
+        DateTime LastBackupTime { get; set; } = DateTime.Now;
+
+        object RequestLock { get; set; } = new object();
+
         public bool Initialise(ServerInstance parent)
         {
             Server = parent;
+
+            Server.Players.OnPlayerJoined += OnPlayerJoined;
+            Server.Players.OnPlayerLeft += OnPlayerLeft;
 
             return true;
         }
 
         public bool TriggerBackup()
         {
-            DateTime timestamp = DateTime.Now;
-
-            string timeStampString = $"{timestamp.ToShortDateString()}-{timestamp.ToShortTimeString()}".Replace("\\", "").Replace("/", "").Replace(":", "");
-
-            string path = Path.Combine(
-                Server.ServerSettings.Backups.BackupsPath.Replace("[SERVER_PATH]", Server.ServerPath),
-                $"{Server.ServerProperties.ServerName}-{Server.ServerProperties.LevelName}-{timeStampString}");
-
-            BackupReceipt receipt = new BackupReceipt()
+            lock (RequestLock)
             {
-                ServerName = Server.ServerProperties.ServerName,
-                LevelName = Server.ServerProperties.LevelName,
-                BackupTime = timestamp,
-                IsCompressed = Server.ServerSettings.Backups.CompressBackups,
-            };
+                DateTime timestamp = DateTime.Now;
 
-            var taskHandle = Server.TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
-            {
-                Task = new SaveBackupTask()
+                if ((timestamp - LastBackupTime).TotalMinutes >= Server.ServerSettings.Backups.BackupCooldownMinutes &&
+                    AnyPlayersOnlineSinceLastBackup)
                 {
-                    TargetDirectory = path,
-                    Receipt = receipt
-                },
-                OnSuccessTask = new ServerTaskController.TaskCreationParams()
-                {
-                    Task = new BackupsPruneTask()
+                    string timeStampString = $"{timestamp.ToShortDateString()}-{timestamp.ToShortTimeString()}".Replace("\\", "").Replace("/", "").Replace(":", "");
+
+                    string path = Path.Combine(
+                        Server.ServerSettings.Backups.BackupsPath.Replace("[SERVER_PATH]", Server.ServerPath),
+                        $"{Server.ServerProperties.ServerName}-{Server.ServerProperties.LevelName}-{timeStampString}");
+
+                    BackupReceipt receipt = new BackupReceipt()
+                    {
+                        ServerName = Server.ServerProperties.ServerName,
+                        LevelName = Server.ServerProperties.LevelName,
+                        BackupTime = timestamp,
+                        IsCompressed = Server.ServerSettings.Backups.CompressBackups,
+                    };
+
+                    var taskHandle = Server.TaskController.QueueTask(new ServerTaskController.TaskCreationParams()
+                    {
+                        Task = new SaveBackupTask()
+                        {
+                            TargetDirectory = path,
+                            Receipt = receipt
+                        },
+                        OnSuccessTask = new ServerTaskController.TaskCreationParams()
+                        {
+                            Task = new BackupsPruneTask()
+                        }
+                    });
+
+                    if (taskHandle != null)
+                    {
+                        AnyPlayersOnlineSinceLastBackup = (Server.Players.OnlinePlayers > 0);
+                        LastBackupTime = timestamp;
+                    }
+
+                    return (taskHandle != null);
                 }
-            }) ;
+            }
 
-            return (taskHandle != null);
+            return false;
         }
-    
+        
+        public void Update()
+        {
+            if((DateTime.Now - LastBackupTime).TotalMinutes >= Server.ServerSettings.Backups.MinutesBetweenAutoBackups)
+            {
+                TriggerBackup();
+                LastBackupTime = DateTime.Now;
+            }
+        }
+
         public List<BackupReceipt> LoadAllBackupReceipts()
         {
             List<BackupReceipt> returnList = new List<BackupReceipt>();
@@ -121,6 +153,20 @@ namespace GXCMCBedrockServerManagerCore
         {
             string dirToDelete = Path.GetDirectoryName(receipt.FullPath);
             Directory.Delete(Path.GetDirectoryName(receipt.FullPath), true);
+        }
+
+        void OnPlayerJoined(ServerPlayers.Player player)
+        {
+            AnyPlayersOnlineSinceLastBackup = true;
+        }
+
+        void OnPlayerLeft(ServerPlayers.Player player)
+        {
+            if(Server.ServerSettings.Backups.BackupWorldOnAllPlayersLeave &&
+                Server.Players.OnlinePlayers == 0)
+            {
+                TriggerBackup();
+            }
         }
     }
 }

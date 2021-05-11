@@ -99,6 +99,7 @@ namespace GXCMCBedrockServerManagerCore
         public void Update()
         {
             TaskController.Update();
+            Backups.Update();
 
             switch(State)
             {

@@ -48,6 +48,13 @@ namespace GXCMCBedrockServerManagerCore
 
         public List<Player> Players { get; private set; }
 
+        public int OnlinePlayers { get { return Players.FindAll(P => P.IsOnline).Count; } }
+
+        public delegate void OnPlayerActionDelegate(Player player);
+
+        public OnPlayerActionDelegate OnPlayerJoined { get; set; }
+        public OnPlayerActionDelegate OnPlayerLeft { get; set; }
+
         ServerInstance Server { get; set; }
 
         public bool Initialise(ServerInstance parent)
@@ -227,7 +234,9 @@ namespace GXCMCBedrockServerManagerCore
         {
             player.IsOnline = true;
 
-            if(player.IsBanned)
+            OnPlayerJoined(player);
+
+            if (player.IsBanned)
             {
                 // todo, this doesn't work, need to delay the action.
                 KickPlayer(player, FormatPlayerMessage(player, Server.ServerSettings.Players.BannedPlayerKickReason));
@@ -245,6 +254,8 @@ namespace GXCMCBedrockServerManagerCore
         public void NotifyPlayerLeftServer(Player player)
         {
             player.IsOnline = false;
+
+            OnPlayerLeft(player);
         }
 
         void OutputHandler_PlayerConnected(ServerInstance server, string output)
