@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GXCMCBedrockServerManagerCore.Tasks;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -238,8 +239,15 @@ namespace GXCMCBedrockServerManagerCore
 
             if (player.IsBanned)
             {
-                // todo, this doesn't work, need to delay the action.
-                KickPlayer(player, FormatPlayerMessage(player, Server.ServerSettings.Players.BannedPlayerKickReason));
+                Server.TaskController.QueueTask(new Tasks.ServerTaskController.TaskCreationParams()
+                {
+                    Task = new KickPlayerTask()
+                    {
+                        PlayerToKick = player,
+                        Reason = FormatPlayerMessage(player, Server.ServerSettings.Players.BannedPlayerKickReason)
+                    },
+                    TaskScheduleTime = DateTime.Now.AddSeconds(5)
+                });
             }
 
             player.LastJoined = DateTime.Now;
